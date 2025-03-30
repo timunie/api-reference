@@ -406,3 +406,5 @@ src/ApiDocumentation/ApiDocumentation/tools/
 .idea/
 
 website/pnpm-lock.yaml
+
+src/ApiDocumentation/tools/
