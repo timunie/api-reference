@@ -160,6 +160,8 @@ body {
 
   --docs-color-android: #44db85;
   --docs-color-apple: var(--docs-color-text) !important;
+
+  --doc-sidebar-width: auto !important;
 }
 
 [data-theme='dark'] {
@@ -270,6 +272,16 @@ ul.menu__list > li > a.menu__link--active {
 nav.menu {
   padding-right: 0;
   scrollbar-gutter: auto;
+  width: 440px;  /* initial width */
+  min-width: 300px;
+  max-width: 600px;
+  resize: horizontal;
+}
+
+@media (min-width: 997px) {
+  .docSidebarContainer_AMtj{
+    width: auto;
+  }
 }
 
 .new-badge::after,

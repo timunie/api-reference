@@ -410,3 +410,5 @@ website/pnpm-lock.yaml
 src/ApiDocumentation/tools/
 
 website/docs/
+
+src/ApiDocumentation/Help/

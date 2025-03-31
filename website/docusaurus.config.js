@@ -16,15 +16,15 @@ const config = {
   tagline: 'API docs for Avalonia',
 
   // Set the production url of your site here
-  url: 'https://timunie.github.io',
+  url: 'https://avaloniaui.net',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/Ava-ApiTests/',
+  baseUrl: '/api-reference/',
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'timunie', // Usually your GitHub org/user name.
-  projectName: 'Ava-ApiTests', // Usually your repo name.
+  organizationName: 'AvaloniaUI', // Usually your GitHub org/user name.
+  projectName: 'Avalonia API-Reference', // Usually your repo name.
 
   onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',
@@ -111,7 +111,7 @@ const config = {
           sidebarPath: require.resolve('./docs/api-sidebar.js'),
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
-          editUrl: 'https://github.com/timunie/Ava-ApiTests',
+          editUrl: 'https://github.com/AvaloniaUI/api-reference',
         },
         theme: {
           customCss: [
