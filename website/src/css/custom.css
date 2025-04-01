@@ -1709,6 +1709,11 @@ img.center {
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
+}
 
+.docs-version-dropdown::before {
+  content: "Version: ";
+  margin-right: 0.1em;
+  color: var(--docs-color-text-100);
 }
 

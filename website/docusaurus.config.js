@@ -6,7 +6,7 @@
 
 const lightCodeTheme = require('prism-react-renderer').themes.github;
 const darkCodeTheme = require('prism-react-renderer').themes.vsDark;
-
+const versionSettings = require('./versionSettings.js').versionSettings;
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
@@ -112,6 +112,13 @@ const config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl: 'https://github.com/AvaloniaUI/api-reference',
+          lastVersion: 'current',
+          versions: {
+            current: {
+              label: versionSettings.current,
+              banner: "none"
+            },
+          },
         },
         theme: {
           customCss: [
@@ -172,11 +179,16 @@ const config = {
             label: 'Docs',
             to: 'https://docs.avaloniaui.net',
           },
+          {
+            type: 'docsVersionDropdown',
+            position: 'right',
+            className: 'docs-version-dropdown',
+          },
         ],
       },
       footer: {
         style: 'dark',
-        copyright: `Copyright © ${new Date().getFullYear()} TimUnie. Built with Docusaurus.`,
+        copyright: `Copyright © ${new Date().getFullYear()} AvaloniaUI. Built with Docusaurus.`,
       },
       prism: {
         theme: lightCodeTheme,

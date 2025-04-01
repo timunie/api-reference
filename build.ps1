@@ -61,12 +61,25 @@ foreach ($proj in $avaloniaProjects){
 # Run the docs. Comment either one
 cd website 
 
+# Set the current version name for the drop-down. For now, only one version can be documented.
+$versionSettings = 
+@"
+// @ts-check
+
+export const versionSettings = {
+    current: '$version',
+};
+"@
+
+ New-item versionSettings.js -ItemType File -Value  $versionSettings -Force
+
+
 # Make sure all dependencies are installed and up to date
 pnpm install
 
 # preview the website if preview switch is on
 if($preview.IsPresent){
-	npx docusaurus start
+	pnpm start
 }
 else{
 	pnpm run build 
