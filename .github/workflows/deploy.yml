@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-24.04
     name: Build and Deploy Job
     steps:
+      - name: Env
+        run: free; df -h;whoami
       - uses: actions/checkout@v2
         with:
           submodules: true
