@@ -454,7 +454,7 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
                     SecurityAlertTemplatePath = ResolvePath(@"Templates\SecurityAlertTemplate.xml"),
                     ToDoAlertTemplatePath = ResolvePath(@"Templates\ToDoAlertTemplate.xml")
                 },
-                new MarkdownElement("paramref", "name", "*", "*", "em"), new PreliminaryElement(),
+                // TODO new MarkdownElement("paramref", "name", "*", "*", "em"), new PreliminaryElement(),
                 // TODO: new PassthroughElement("remarks"),
                 new MdxRemarksElement("remarks"), 
 				new ReturnsElement(), 
@@ -505,6 +505,11 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
                     t => RenderApiBibliographySection(t)),
                 new ApiTopicSectionHandler(ApiTopicSectionType.SeeAlso, t => RenderApiSeeAlsoSection(t))
             });
+        }
+
+        protected override void CreateNoticeDefinitions()
+        {
+            // TODO
         }
 
         /// <inheritdoc />

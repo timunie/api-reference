@@ -10,6 +10,9 @@ param (
 git config --file=.gitmodules submodule.Avalonia.branch "release/$version"  # change branch to requested version
 git submodule update --init --recursive
 
+# set SHFBRoot
+$env:SHFBRoot = ".\src\packages\ewsoftware.shfb\2025.3.22\tools\"
+
 # Define a list of dotNET projects to build
 $avaloniaProjects = @(
     # Documented Avalonia projects
