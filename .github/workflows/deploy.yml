@@ -26,7 +26,7 @@ jobs:
         with:
           version: 10.7.0
       - name: Install dependencies
-        run: sudo apt-get install -y rsync wget apt-transport-https software-properties-common && wget -q https://packages.microsoft.com/config/ubuntu/24.04/packages-microsoft-prod.deb && dpkg -i packages-microsoft-prod.deb && apt update && apt install -y powershell
+        run: sudo apt-get install -y rsync wget apt-transport-https software-properties-common && wget -q https://packages.microsoft.com/config/ubuntu/24.04/packages-microsoft-prod.deb && sudo dpkg -i packages-microsoft-prod.deb && sudo apt update && sudo apt install -y powershell
       - name: Run build script
         run: pwsh build.ps1 -version 11.2.6
 #      - name: Setup key
