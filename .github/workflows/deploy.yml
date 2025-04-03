@@ -31,7 +31,7 @@ jobs:
         run: ./build.ps1 -version 11.2.6
       - name: Find
         shell: bash
-        find ./website/build
+        run: find ./website/build
 #      - name: Setup key
 #        run: echo '${{ secrets.DEPLOY_KEY }}' > ./upload.key && chmod 700 ./upload.key
 #      - name: Build And Deploy
