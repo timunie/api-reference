@@ -8,11 +8,9 @@ on:
 jobs:
   build_and_deploy_job:
     if: github.event_name == 'push'
-    runs-on: ubuntu-24.04
+    runs-on: windows-latedt
     name: Build and Deploy Job
     steps:
-      - name: Env
-        run: free; df -h;whoami
       - uses: actions/checkout@v2
         with:
           submodules: true
@@ -25,10 +23,15 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           version: 10.7.0
-      - name: Install dependencies
-        run: sudo apt-get install -y rsync wget apt-transport-https software-properties-common && wget -q https://packages.microsoft.com/config/ubuntu/24.04/packages-microsoft-prod.deb && sudo dpkg -i packages-microsoft-prod.deb && sudo apt update && sudo apt install -y powershell
+      - name: workloads 1
+        run: dotnet workload restore ext/Avalonia/src/iOS/Avalonia.iOS/Avalonia.iOS.csproj
+      - name: workloads 2
+        run: dotnet workload restore ext/Avalonia/src/Android/Avalonia.Android/Avalonia.Android.csproj
       - name: Run build script
-        run: pwsh build.ps1 -version 11.2.6
+        run: ./build.ps1 -version 11.2.6
+      - name: Find
+        shell: bash
+        find ./website/build
 #      - name: Setup key
 #        run: echo '${{ secrets.DEPLOY_KEY }}' > ./upload.key && chmod 700 ./upload.key
 #      - name: Build And Deploy
