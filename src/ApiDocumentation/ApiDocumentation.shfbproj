@@ -6,7 +6,7 @@
   <PropertyGroup>
     <SHFBVersion>9.0.0</SHFBVersion>
 	<!-- NOTE: Update the version number in the path (YYYY.M.D.R) to match the package version -->
-    <SHFBROOT Condition=" '$(SHFBROOT)' == '' ">$(MSBuildThisFileDirectory)..\packages\EWSoftware.SHFB.$(SHFBVersion)\Tools\</SHFBROOT>
+    <SHFBROOT Condition=" '$(SHFBROOT)' == '' ">$(MSBuildThisFileDirectory)\packages\ewsoftware.shfb.net\$(SHFBVersion)\Tools\</SHFBROOT>
 
     <!-- A target framework version is required by Visual Studio.  It can be any version with a targeting pack installed. -->
     <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
