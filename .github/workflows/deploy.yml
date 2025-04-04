@@ -59,7 +59,6 @@ jobs:
         with:
           version: 10.7.0
       - name: Run build script
-        run: bash ./website/build.sh --build
-      - name: find
+        working-directory: ./website/
         shell: bash
-        run: find ./artifacts.zip
+        run: ./build.sh --build
