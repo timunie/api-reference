@@ -46,8 +46,7 @@
     "node": ">=18.0"
   },
   "pnpm": {
-	   "neverBuiltDependencies": []
+	"neverBuiltDependencies": []
   },
   "packageManager": "pnpm@10.7.0"
-  }
 }
