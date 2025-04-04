@@ -59,7 +59,7 @@ jobs:
         with:
           version: 10.7.0
       - name: Run build script
-        run: ./website/build.ps1 -build
+        run: bash ./website/build.sh --build
       - name: find
         shell: bash
         run: find ./artifacts.zip
