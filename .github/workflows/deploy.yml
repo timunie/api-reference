@@ -3,10 +3,10 @@ name: Deploy
 on:
   push:
     branches:
-      - cicd 
+      - cicd
 
 jobs:
-  build_and_deploy_job:
+  build_job:
     if: github.event_name == 'push'
     runs-on: windows-latest
     name: Build and Deploy Job
@@ -19,7 +19,7 @@ jobs:
           dotnet-version: '9.0.x'
       - uses: actions/setup-node@v3
         with:
-          node-version: 22.14 
+          node-version: 22.14
       - uses: pnpm/action-setup@v4
         with:
           version: 10.7.0
@@ -29,15 +29,37 @@ jobs:
         run: dotnet workload restore ext/Avalonia/src/Android/Avalonia.Android/Avalonia.Android.csproj
       - name: Run build script
         run: ./build.ps1 -version 11.2.6 -pack
-      - name: Find
+      - name: find
         shell: bash
-        run: find ./website/build
-      - uses: actions/upload-artifact@v4
+        run: find ./artifacts.zip
+      - name: Upload SFHB result temporarily as atifact
+        uses: actions/upload-artifact@v4
         with:
           name: website-artifact
           path: ./artifacts.zip
           retention-days: 1
-#      - name: Setup key
-#        run: echo '${{ secrets.DEPLOY_KEY }}' > ./upload.key && chmod 700 ./upload.key
-#      - name: Build And Deploy
-#        run: ./deploy.sh $DEPLOY_ARGS
+  #      - name: Setup key
+  #        run: echo '${{ secrets.DEPLOY_KEY }}' > ./upload.key && chmod 700 ./upload.key
+  #      - name: Build And Deploy
+  #        run: ./deploy.sh $DEPLOY_ARGS
+  docusaurus_deploy_job:
+    runs-on: ubuntu-latest
+    name: Build website
+    needs: build_job
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: website-artifact
+          path: ./website/artifacts.zip
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 22.14
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.7.0
+      - name: Run build script
+        run: ./website/build.ps1 -build
+      - name: find
+        shell: bash
+        run: find ./artifacts.zip

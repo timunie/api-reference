@@ -67,9 +67,6 @@ foreach ($proj in $avaloniaProjects){
 	Write-Host "built $proj"
 }
 
-# Run the docs. Comment either one
-cd website 
-
 # Set the current version name for the drop-down. For now, only one version can be documented.
 $versionSettings = 
 @"
@@ -80,23 +77,23 @@ export const versionSettings = {
 };
 "@
 
- New-item versionSettings.js -ItemType File -Value  $versionSettings -Force
+New-item ./website/versionSettings.js -ItemType File -Value  $versionSettings -Force
 
 # preview the website if preview switch is on
 if($preview.IsPresent){
-	# Make sure all dependencies are installed and up to date
-    pnpm install
-	pnpm start
+	pushd ./website
+	./build.ps1 -preview
+	popd
 }
 
 # build the website if build switch is on
 if($build.IsPresent){
-    # Make sure all dependencies are installed and up to date
-    pnpm install
-	pnpm build 
+	pushd ./website
+    ./build.ps1 -build
+	popd
 }
 
 # pack the md-files and version settings if pack switch is on
 if($pack.IsPresent){
-	Compress-Archive -Path ./docs, .\versionSettings.js -DestinationPath ../artifacts.zip
+	Compress-Archive -Path ./website/docs, ./website/versionSettings.js -DestinationPath ./artifacts.zip -Force
 }
