@@ -60,5 +60,4 @@ jobs:
           version: 10.7.0
       - name: Run build script
         working-directory: ./website/
-        shell: bash
-        run: ./build.sh --build
+        run: bash ./build.sh --build
