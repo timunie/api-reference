@@ -78,12 +78,12 @@ export const versionSettings = {
 
 
 # Make sure all dependencies are installed and up to date
-pnpm install
+yarn
 
 # preview the website if preview switch is on
 if($preview.IsPresent){
-	pnpm start
+	yarn start
 }
 else{
-	pnpm run build 
+	yarn build 
 }
