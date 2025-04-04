@@ -3,10 +3,10 @@ param (
 	[string]$version,
    
 	[Parameter(HelpMessage="Opens a preview of the website")]
-	[switch]$preview
+	[switch]$preview,
 	
-	[Parameter(HelpMessage="Produces an optimized website")]
-	[switch]$build
+	[Parameter(HelpMessage="Produces an optimized build of the website")]
+	[switch]$build,
 	
 	[Parameter(HelpMessage="Packs the generated MD-files into artifacts.zip")]
 	[switch]$pack
