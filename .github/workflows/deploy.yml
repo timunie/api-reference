@@ -61,3 +61,11 @@ jobs:
       - name: Run build script
         working-directory: ./website/
         run: bash ./build.sh --build
+      - name: Install dependencies
+        run: sudo apt-get update; sudo apt-get install -y rsync
+      - name: Setup key
+        working-directory: ./website/
+        run: echo '${{ secrets.DEPLOY_KEY }}' > ./upload.key && chmod 700 ./upload.key
+      - name: Build And Deploy
+        working-directory: ./website/
+        run: ./deploy.sh ${{ vars.DEPLOY_HOST }} ${{ vars.DEPLOY_PORT }} ${{ vars.DEPLOY_USER }}
