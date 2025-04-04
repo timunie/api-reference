@@ -21,6 +21,7 @@
     "@mdx-js/react": "^3.1.0",
     "@rspack/core": "^1.2.8",
     "clsx": "^2.1.1",
+    "graceful-fs": "^4.2.11",
     "prism-react-renderer": "^2.4.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
@@ -43,6 +44,9 @@
   },
   "engines": {
     "node": ">=18.0"
+  },
+  "pnpm": {
+	"neverBuiltDependencies": []
   },
   "packageManager": "pnpm@10.7.0"
 }
