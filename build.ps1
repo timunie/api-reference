@@ -2,8 +2,14 @@ param (
 	[Parameter(Mandatory, HelpMessage="Enter the Avalonia version to document")]
 	[string]$version,
    
-	[Parameter()]
+	[Parameter(HelpMessage="Opens a preview of the website")]
 	[switch]$preview
+	
+	[Parameter(HelpMessage="Produces an optimized website")]
+	[switch]$build
+	
+	[Parameter(HelpMessage="Packs the generated MD-files into artifacts.zip")]
+	[switch]$pack
 )
 
 # Update git submodules
@@ -76,14 +82,21 @@ export const versionSettings = {
 
  New-item versionSettings.js -ItemType File -Value  $versionSettings -Force
 
-
-# Make sure all dependencies are installed and up to date
-pnpm install
-
 # preview the website if preview switch is on
 if($preview.IsPresent){
+	# Make sure all dependencies are installed and up to date
+    pnpm install
 	pnpm start
 }
-else{
+
+# build the website if build switch is on
+if($build.IsPresent){
+    # Make sure all dependencies are installed and up to date
+    pnpm install
 	pnpm build 
+}
+
+# pack the md-files and version settings if pack switch is on
+if($pack.IsPresent){
+	Compress-Archive -Path ./docs, .\versionSettings.js -DestinationPath ../artifacts.zip
 }
