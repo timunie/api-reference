@@ -18,6 +18,7 @@
 // 02/27/2025  TU   Adjusted the code to support the MDX-format
 //===============================================================================================================
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -42,18 +43,18 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
         public DocusaurusMarkdownPresentationStyle()
         {
             // The base path of the presentation style files relative to the assembly's location
-            BasePath = "DocusaurusMarkdown";
+            this.BasePath = "DocusaurusMarkdown";
 
-            SupportedFormats = HelpFileFormats.Markdown;
+            this.SupportedFormats = HelpFileFormats.Markdown;
 
-            SupportsNamespaceGrouping = true;
+            this.SupportsNamespaceGrouping = true;
 
-            DocumentModelApplicator = new StandardDocumentModel();
-            ApiTableOfContentsGenerator = new StandardApiTocGenerator();
-            TopicTransformation = new DocusaurusMarkdownTransformation(ResolvePath);
+            this.DocumentModelApplicator = new StandardDocumentModel();
+            this.ApiTableOfContentsGenerator = new StandardApiTocGenerator();
+            this.TopicTransformation = new DocusaurusMarkdownTransformation(ResolvePath);
 
             // If relative, these paths are relative to the base path
-            BuildAssemblerConfiguration = @"Configuration\BuildAssembler.config";
+            this.BuildAssemblerConfiguration = @"Configuration\BuildAssembler.config";
         }
 
         /// <inheritdoc />
@@ -61,7 +62,7 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
         /// Markdown specific values.</remarks>
         public override IEnumerable<string> ResourceItemFiles(string languageName)
         {
-            string filePath = ResolvePath(@"..\Shared\Content"),
+            string filePath = this.ResolvePath(@"..\Shared\Content"),
                 fileSpec = "SharedContent_" + languageName + ".xml";
 
             if(!File.Exists(Path.Combine(filePath, fileSpec)))
@@ -76,7 +77,7 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
 
             yield return Path.Combine(filePath, fileSpec);
 
-            foreach(string f in AdditionalResourceItemsFiles)
+            foreach(string f in this.AdditionalResourceItemsFiles)
                 yield return f;
         }
     }
