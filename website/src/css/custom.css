@@ -282,6 +282,10 @@ nav.menu {
   .docSidebarContainer_AMtj{
     width: auto;
   }
+  .sidebarViewport_Twny {
+    top: 32px !important;
+    max-height: calc(100vh - 32px) !important;
+  }
 }
 
 .new-badge::after,
