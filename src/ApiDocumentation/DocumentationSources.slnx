@@ -1,7 +1,7 @@
 <Solution >
     <Import Project="..\..\ext\Avalonia\build\TargetFrameworks.props" />
 
-	<Project Path="..\..\ext\Avalonia\packages\Avalonia\Avalonia.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />
+    <Project Path="..\..\ext\Avalonia\src\Android\Avalonia.Android\Avalonia.Android.csproj" TargetFramework="$(AvsCurrentAndroidTargetFramework)" />
 	<Project Path="..\..\ext\Avalonia\src\Android\Avalonia.Android\Avalonia.Android.csproj" TargetFramework="$(AvsCurrentAndroidTargetFramework)" />
 	<Project Path="..\..\ext\Avalonia\src\Avalonia.Base\Avalonia.Base.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />
 	<Project Path="..\..\ext\Avalonia\src\Avalonia.Controls.ColorPicker\Avalonia.Controls.ColorPicker.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />

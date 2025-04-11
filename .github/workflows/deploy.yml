@@ -22,13 +22,13 @@ jobs:
           node-version: 22.14
       - uses: pnpm/action-setup@v4
         with:
-          version: 10.7.0
+          version: 11.3.0
       - name: workloads 1
         run: dotnet workload restore ext/Avalonia/src/iOS/Avalonia.iOS/Avalonia.iOS.csproj
       - name: workloads 2
         run: dotnet workload restore ext/Avalonia/src/Android/Avalonia.Android/Avalonia.Android.csproj
       - name: Run build script
-        run: ./build.ps1 -version 11.2.6 -pack
+        run: ./build.ps1 -pack
       - name: find
         shell: bash
         run: find ./artifacts.zip
@@ -38,10 +38,6 @@ jobs:
           name: website-artifact
           path: ./artifacts.zip
           retention-days: 1
-  #      - name: Setup key
-  #        run: echo '${{ secrets.DEPLOY_KEY }}' > ./upload.key && chmod 700 ./upload.key
-  #      - name: Build And Deploy
-  #        run: ./deploy.sh $DEPLOY_ARGS
   docusaurus_deploy_job:
     runs-on: ubuntu-latest
     name: Build website
@@ -57,7 +53,7 @@ jobs:
           node-version: 22.14
       - uses: pnpm/action-setup@v4
         with:
-          version: 10.7.0
+          version: 11.3.0
       - name: Run build script
         working-directory: ./website/
         run: bash ./build.sh --build
