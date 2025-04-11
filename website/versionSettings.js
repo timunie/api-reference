@@ -1,5 +1,6 @@
 // @ts-check
+const fs = require('node:fs');
 
 export const versionSettings = {
-    current: '11.2.0',
+    current: fs.readFile('./../AvaloniaVersion.txt'),
 };
