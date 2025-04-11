@@ -22,7 +22,7 @@ jobs:
           node-version: 22.14
       - uses: pnpm/action-setup@v4
         with:
-          version: 11.3.0
+          version: 10.8.0
       - name: workloads 1
         run: dotnet workload restore ext/Avalonia/src/iOS/Avalonia.iOS/Avalonia.iOS.csproj
       - name: workloads 2
@@ -53,7 +53,7 @@ jobs:
           node-version: 22.14
       - uses: pnpm/action-setup@v4
         with:
-          version: 11.3.0
+          version: 10.8.0
       - name: Run build script
         working-directory: ./website/
         run: bash ./build.sh --build
