@@ -84,8 +84,8 @@
 <PlugInConfig id="AvaloniaAttributes" enabled="True"><configuration /></PlugInConfig>
 <PlugInConfig id="Additional Notices" enabled="True"><configuration>
   <Notices>
-    <Notice AttributeTypeName="T:Avalonia.Metadata.UnstableAttribute" NoticeMessage="@boilerplate_unstableLong" TagText="@boilerplate_unstableShort" TagStyleClasses="is-info" UseValueForText="false" />
-    <Notice AttributeTypeName="T:Avalonia.Metadata.NotClientImplementableAttribute" NoticeMessage="@boilerplate_notClientImplementableLong" TagText="@boilerplate_notClientImplementableShort" TagStyleClasses="is-warning" UseValueForText="false" />
+    <Notice AttributeTypeName="T:Avalonia.Metadata.UnstableAttribute" NoticeMessage="@boilerplate_unstableLong" TagText="@boilerplate_unstableShort" NoticeStyleClasses="info" TagStyleClasses="is-info" UseValueForText="false" />
+    <Notice AttributeTypeName="T:Avalonia.Metadata.NotClientImplementableAttribute" NoticeMessage="@boilerplate_notClientImplementableLong" TagText="@boilerplate_notClientImplementableShort" NoticeStyleClasses="warning" TagStyleClasses="is-warning" UseValueForText="false" />
   </Notices>
 </configuration></PlugInConfig></PlugInConfigurations>
     <ComponentPath>tools\</ComponentPath>

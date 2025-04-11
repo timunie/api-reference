@@ -678,31 +678,33 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
 
                 if(!String.IsNullOrWhiteSpace(noticeText))
                 {
-                    var message = new XElement("strong");
+                    var message = new XElement("p", "\n",
+                        $":::{n.NoticeStyleClasses ?? "warning"}");
 
+                    if(n.TagText?.Length > 1 && n.TagText[0] == '@')
+                        message.Add("[", 
+                            new XElement("include", new XAttribute("item", n.TagText.Substring(1))), 
+                            "]");
+                    else if (n.TagText?.Length > 1)
+                        message.Add($"[{n.TagText}]");
+                    
+                    message.Add("\n");
+                    
                     // If the notice text starts with '@', it's a content item
                     if(noticeText[0] == '@')
                         message.Add(new XElement("include", new XAttribute("item", noticeText.Substring(1))));
                     else
                         message.Add(noticeText);
 
+                    message.Add("\n:::\n");
+                    
                     notices.Add(message);
                 }
             }
-
-            if(notices.Count != 0)
+            
+            foreach(var n in notices)
             {
-                var notes = new XElement("blockquote");
-
-                transformation.CurrentElement.Add(notes, "\n");
-
-                foreach(var n in notices)
-                {
-                    if(!notes.IsEmpty)
-                        notes.Add(new XElement("br"));
-
-                    notes.Add(n);
-                }
+                transformation.CurrentElement.Add(n, "\n\n");
             }
         }
 
@@ -745,7 +747,7 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
 
                 if(!String.IsNullOrWhiteSpace(noticeText))
                 {
-                    var tag = new XElement("strong");
+                    var tag = new XElement("Tag", new XAttribute("type", n.TagStyleClasses ?? "is-warning"));
 
                     // If the notice text starts with '@', it's a content item
                     if(noticeText[0] == '@')
