@@ -21,6 +21,7 @@
 //===============================================================================================================
 
 using System;
+using System.Linq;
 using System.Xml.Linq;
 using Sandcastle.Core.PresentationStyle.Transformation;
 using Sandcastle.Core.PresentationStyle.Transformation.Elements;
@@ -43,9 +44,6 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown.Elements
         {
         }
 
-        #region Methods
-        //=====================================================================
-
         /// <inheritdoc />
         public override void Render(TopicTransformationCore transformation, XElement element)
         {
@@ -55,8 +53,17 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown.Elements
             if(element == null)
                 throw new ArgumentNullException(nameof(element));
 
+            // We are inside a table, so we need to render it inline
+            if (transformation.CurrentElement.AncestorsAndSelf("td").Any())
+            {
+                transformation.CurrentElement.Add($"`");
+                transformation.RenderChildElements(transformation.CurrentElement, element.Nodes());
+                transformation.CurrentElement.Add($"`");
+                return;
+            }
+            
             string? language = element.Attribute("language")?.Value, title = element.Attribute("title")?.Value;
-
+            
             transformation.CurrentElement.Add("\n\n");
 
             if(!String.IsNullOrWhiteSpace(title) || (title == null && !String.IsNullOrWhiteSpace(language) &&
@@ -89,6 +96,5 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown.Elements
             transformation.RenderChildElements(transformation.CurrentElement, element.Nodes());
             transformation.CurrentElement.Add("\n```\n");
         }
-        #endregion
     }
 }
