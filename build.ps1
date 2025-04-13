@@ -28,6 +28,11 @@ $env:SHFBRoot = ".\src\packages\ewsoftware.shfb\2025.3.22\tools\"
 
 # Define a list of dotNET projects to build
 $projectsToBuild = @(
+    # Build Avalonia dependencies
+	"ext/Avalonia/src/Markup/Avalonia.Markup.Xaml/Avalonia.Markup.Xaml.csproj",
+	"ext/Avalonia/src/tools/Avalonia.Generators/Avalonia.Generators.csproj",
+	"ext/Avalonia/src/Avalonia.Build.Tasks/Avalonia.Build.Tasks.csproj",
+	
     # Build all documentation sources. Check the slnx file to add or remove additional projects to use.
 	"src/ApiDocumentation/DocumentationSources.slnx",
 	

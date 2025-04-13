@@ -1,6 +1,6 @@
-<Solution >
+<Solution>
     <Import Project="..\..\ext\Avalonia\build\TargetFrameworks.props" />
-
+	
     <Project Path="..\..\ext\Avalonia\src\Android\Avalonia.Android\Avalonia.Android.csproj" TargetFramework="$(AvsCurrentAndroidTargetFramework)" />
 	<Project Path="..\..\ext\Avalonia\src\Avalonia.Base\Avalonia.Base.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />
 	<Project Path="..\..\ext\Avalonia\src\Avalonia.Controls.ColorPicker\Avalonia.Controls.ColorPicker.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />
@@ -13,6 +13,7 @@
 	<Project Path="..\..\ext\Avalonia\src\Avalonia.Fonts.Inter\Avalonia.Fonts.Inter.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />
 	<Project Path="..\..\ext\Avalonia\src\Avalonia.FreeDesktop\Avalonia.FreeDesktop.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />
 	<Project Path="..\..\ext\Avalonia\src\Avalonia.Metal\Avalonia.Metal.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />
+	<Project Path="..\..\ext\Avalonia\src\Avalonia.MicroCom\Avalonia.MicroCom.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />
 	<Project Path="..\..\ext\Avalonia\src\Avalonia.Native\Avalonia.Native.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />
 	<Project Path="..\..\ext\Avalonia\src\Avalonia.OpenGL\Avalonia.OpenGL.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />
 	<Project Path="..\..\ext\Avalonia\src\Avalonia.ReactiveUI\Avalonia.ReactiveUI.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />
@@ -27,9 +28,6 @@
 	<Project Path="..\..\ext\Avalonia\src\Skia\Avalonia.Skia\Avalonia.Skia.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />
 	<Project Path="..\..\ext\Avalonia\src\Windows\Avalonia.Direct2D1\Avalonia.Direct2D1.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />
     <Project Path="..\..\ext\Avalonia\src\Windows\Avalonia.Win32\Avalonia.Win32.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />
-	
-	<!-- TODO: These two don't work as intended.  -->
-	<!-- <Project Path="..\..\ext\Avalonia\src\Windows\Avalonia.Win32.Interoperability\Avalonia.Win32.Interoperability.csproj" TargetFramework="$(AvsCurrentTargetFramework)" /> -->
-	<!-- <Project Path="..\..\ext\Avalonia\src\Tizen\Avalonia.Tizen\Avalonia.Tizen.csproj" TargetFramework="$(AvsCurrentTizenTargetFramework)" /> -->
-      
+    <Project Path="..\..\ext\Avalonia\src\Windows\Avalonia.Win32.Interoperability\Avalonia.Win32.Interoperability.csproj" TargetFramework="$(AvsCurrentWindowsTargetFramework)" />
+   
 </Solution>
