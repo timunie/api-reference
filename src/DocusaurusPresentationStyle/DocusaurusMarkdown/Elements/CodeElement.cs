@@ -53,8 +53,8 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown.Elements
             if(element == null)
                 throw new ArgumentNullException(nameof(element));
 
-            // We are inside a table, so we need to render it inline
-            if (transformation.CurrentElement.AncestorsAndSelf("td").Any())
+            // We have no new line, so we can render it inline
+            if (!element.Value.Contains("\n"))
             {
                 transformation.CurrentElement.Add($"`");
                 transformation.RenderChildElements(transformation.CurrentElement, element.Nodes());
