@@ -31,6 +31,7 @@ using Sandcastle.Core.PresentationStyle.Transformation.Elements;
 using Sandcastle.Core.PresentationStyle.Transformation.Elements.Html;
 using Sandcastle.Core.PresentationStyle.Transformation.Elements.Markdown;
 using Sandcastle.Core.Reflection;
+using CodeElement = DocusaurusPresentationStyle.DocusaurusMarkdown.Elements.CodeElement;
 using MarkdownGlossaryElement = Sandcastle.Core.PresentationStyle.Transformation.Elements.Markdown.GlossaryElement;
 
 namespace DocusaurusPresentationStyle.DocusaurusMarkdown
@@ -276,7 +277,7 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
                 // type (API or MAML).
                 new BibliographyElement(),
                 new CiteElement(),
-                new PassthroughElement("code"), // TODO: CodeElement?
+                new CodeElement("code"),
                 new PassthroughElement("include"),
                 new PassthroughElement("includeAttribute"),
                 new MarkupElement(),
