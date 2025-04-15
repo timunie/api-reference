@@ -407,8 +407,7 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
                     SecurityAlertTemplatePath = this.ResolvePath(@"Templates\SecurityAlertTemplate.xml"),
                     ToDoAlertTemplatePath = this.ResolvePath(@"Templates\ToDoAlertTemplate.xml")
                 },
-                // TODO new MarkdownElement("paramref", "name", "*", "*", "em"),
-                // TODO: new NamedSectionElement("remarks"),
+                new MarkdownElement("paramref", "name", "*", "*", "em"),
                 new IgnoredElement("preliminary"),
                 new MdxRemarksElement("remarks"),
                 new ReturnsElement(),
@@ -427,10 +426,11 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
                 new ThreadsafetyElement(),
                 new MarkdownElement("typeparamref", "name", "*", "*", "em"),
                 new ValueElement(),
-                new VersionsElement()
+                new VersionsElement(),
             });
-            // TODO: Is that still needed?
-            ReplaceElement(new ConvertibleElement("list", "ul"));
+            
+            // The build in list element isn't mdx complient, so we need to provide our own
+            ReplaceElement(new MdxListElement("list"));
         }
 
         /// <inheritdoc />

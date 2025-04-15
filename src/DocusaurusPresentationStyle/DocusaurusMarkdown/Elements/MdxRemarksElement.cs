@@ -46,7 +46,7 @@ public class MdxRemarksElement(string name) : NamedSectionElement(name)
         if (!element.Elements().Any() && element.Value.NormalizeWhiteSpace().Length == 0)
             return;
 
-        transformation.RenderNode(new XElement("span", "**Remarks:** "));
+        transformation.CurrentElement.Add(new XElement("span", " **Remarks:** "));
         transformation.RenderChildElements(transformation.CurrentElement, element.Nodes());
     }
 }
