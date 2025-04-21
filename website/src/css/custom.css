@@ -275,7 +275,6 @@ nav.menu {
   width: 440px;  /* initial width */
   min-width: 300px;
   max-width: 600px;
-  resize: horizontal;
 }
 
 @media (min-width: 997px) {
@@ -1721,3 +1720,14 @@ img.center {
   color: var(--docs-color-text-100);
 }
 
+.resizer{
+  width: 5px;
+  height: 100vh;
+  margin: -2px;
+  background: transparent;
+  position: absolute;
+  cursor: ew-resize;
+  top: 0;
+  right: 0;
+  visibility: inherit;
+}
