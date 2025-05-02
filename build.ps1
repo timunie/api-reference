@@ -12,7 +12,7 @@ param (
 	[switch]$pack
 )
 
-if ($version.IsPresent){
+if ($PSBoundParameters.ContainsKey("version")){
 	New-item ./AvaloniaVersion.txt -ItemType File -Value  $version -Force
 }
 else{
@@ -20,7 +20,7 @@ else{
 }
 
 # Update git submodules
-git config --file=.gitmodules submodule.Avalonia.branch "release/$version"  # change branch to requested version
+git submodule set-branch --branch release/$version ext/Avalonia
 git submodule update --init --recursive
 
 # set SHFBRoot
