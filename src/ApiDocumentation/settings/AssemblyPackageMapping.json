@@ -10,6 +10,7 @@
 	"Avalonia.Generators" : "Avalonia",
 	"Avalonia.Markup" : "Avalonia",
 	"Avalonia.Markup.Xaml" : "Avalonia",
+	"Avalonia.Markup.Xaml.Loader" : "Avalonia",
 	"Avalonia.Metal" : "Avalonia",
 	"Avalonia.MicroCom" : "Avalonia",
 	"Avalonia.OpenGL" : "Avalonia",

@@ -72,6 +72,10 @@
 		  <DocumentationSource sourceFile="..\..\ext\Avalonia\src\Windows\Avalonia.Win32.Automation\Avalonia.Win32.Automation.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />
 		  <DocumentationSource sourceFile="..\..\ext\Avalonia\src\Windows\Avalonia.Win32\Avalonia.Win32.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />
 		  
+		  <DocumentationSource sourceFile="..\..\ext\Avalonia\src\Markup\Avalonia.Markup\Avalonia.Markup.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />
+		  <DocumentationSource sourceFile="..\..\ext\Avalonia\src\Markup\Avalonia.Markup.Xaml\Avalonia.Markup.Xaml.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />
+		  <DocumentationSource sourceFile="..\..\ext\Avalonia\src\Markup\Avalonia.Markup.Xaml.Loader\Avalonia.Markup.Xaml.Loader.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />
+		  
 		  <!-- TODO: These two don't work as intended.  -->
 		  <!-- <DocumentationSource sourceFile="..\..\ext\Avalonia\src\Windows\Avalonia.Win32.Interoperability\Avalonia.Win32.Interoperability.csproj" TargetFramework="$(AvsCurrentTargetFramework)" /> -->
 		  <!-- <DocumentationSource sourceFile="..\..\ext\Avalonia\src\Tizen\Avalonia.Tizen\Avalonia.Tizen.csproj" TargetFramework="$(AvsCurrentTizenTargetFramework)" /> -->
