@@ -3,7 +3,7 @@
 //===============================================================================================================
 // System  : Sandcastle Tools Standard Presentation Styles
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Note    : Copyright 2015-2022, Eric Woodruff, All rights reserved
+// Note    : Copyright 2022-2025, Eric Woodruff, All rights reserved
 //
 // This file contains the presentation style definition for the markdown content presentation style
 //
@@ -14,7 +14,7 @@
 //
 //    Date     Who  Comments
 // ==============================================================================================================
-// 04/02/2015  EFW  Created the code
+// 04/25/2022  EFW  Created the code
 // 02/27/2025  TU   Adjusted the code to support the MDX-format
 //===============================================================================================================
 
@@ -31,6 +31,7 @@ using Sandcastle.Core.PresentationStyle.Transformation.Elements;
 using Sandcastle.Core.PresentationStyle.Transformation.Elements.Html;
 using Sandcastle.Core.PresentationStyle.Transformation.Elements.Markdown;
 using Sandcastle.Core.Reflection;
+using CodeElement = DocusaurusPresentationStyle.DocusaurusMarkdown.Elements.CodeElement;
 using MarkdownGlossaryElement = Sandcastle.Core.PresentationStyle.Transformation.Elements.Markdown.GlossaryElement;
 
 namespace DocusaurusPresentationStyle.DocusaurusMarkdown
@@ -43,13 +44,10 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
     {
         //=====================================================================
 
-        private XDocument? _pageTemplate;
+        private XDocument? pageTemplate;
 
-        private static readonly HashSet<string> SpacePreservedElements = new HashSet<string>(
-            new[] { "pre", "snippet" }, StringComparer.OrdinalIgnoreCase);
-
-        private static readonly Dictionary<string, XNode> ShortAttributeRepresentation = new Dictionary<string, XNode>();
-        private static readonly Dictionary<string, XNode> LongAttributeRepresentation = new Dictionary<string, XNode>();
+        private static readonly HashSet<string> spacePreservedElements = new HashSet<string>(
+            new[] { "code", "pre", "snippet" }, StringComparer.OrdinalIgnoreCase);
 
         //=====================================================================
 
@@ -59,40 +57,7 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
         /// <param name="resolvePath">The function used to resolve content file paths for the presentation style</param>
         public DocusaurusMarkdownTransformation(Func<string, string> resolvePath) : base(HelpFileFormats.Markdown, resolvePath)
         {
-            TopicTemplatePath = ResolvePath(@"Templates\TopicTemplate.xml");
-            
-            // obsolete attribute
-            ShortAttributeRepresentation.Add("T:System.ObsoleteAttribute", new XElement("Tag",
-                new XAttribute("type", "is-danger"),
-                new XElement("include",
-                    new XAttribute("item", "boilerplate_obsoleteShort"))));
-            
-            LongAttributeRepresentation.Add("T:System.ObsoleteAttribute", new XElement("span",
-                "\n:::warning[Obsolete]\n\n",
-                new XElement("include", new XAttribute("item", "boilerplate_obsoleteLong")),
-                "\n\n:::\n\n"));
-            
-            // unstable attribute
-            ShortAttributeRepresentation.Add("T:Avalonia.Metadata.UnstableAttribute", new XElement("Tag",
-                new XAttribute("type", "is-info"),
-                new XElement("include",
-                    new XAttribute("item", "boilerplate_unstableShort"))));
-            
-            LongAttributeRepresentation.Add("T:Avalonia.Metadata.UnstableAttribute", new XElement("span",
-                "\n:::note[Unstable]\n\n",
-                new XElement("include", new XAttribute("item", "boilerplate_unstableLong")),
-                "\n\n:::\n\n"));
-            
-            // not client implementable attribute
-            ShortAttributeRepresentation.Add("T:Avalonia.Metadata.NotClientImplementableAttribute", new XElement("Tag",
-                new XAttribute("type", "is-warning"),
-                new XElement("include",
-                    new XAttribute("item", "boilerplate_notClientImplementableShort"))));
-            
-            LongAttributeRepresentation.Add("T:Avalonia.Metadata.NotClientImplementableAttribute", new XElement("span",
-                "\n:::warning[Not client implementable]\n\n",
-                new XElement("include", new XAttribute("item", "boilerplate_notClientImplementableLong")),
-                "\n:::\n\n"));
+            this.TopicTemplatePath = this.ResolvePath(@"Templates\TopicTemplate.xml");
         }
 
         //=====================================================================
@@ -100,62 +65,48 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
         /// <summary>
         /// Maximum version parts
         /// </summary>
-        private int MaxVersionParts => int.TryParse(TransformationArguments[nameof(MaxVersionParts)].Value,
-            out int maxVersionParts) ?
-            maxVersionParts :
-            5;
+        private int MaxVersionParts => Int32.TryParse(this.TransformationArguments[nameof(MaxVersionParts)].Value,
+            out int maxVersionParts) ? maxVersionParts : 5;
 
         /// <summary>
         /// Include enumerated type values
         /// </summary>
-        private bool IncludeEnumValues => bool.TryParse(
-            TransformationArguments[nameof(IncludeEnumValues)].Value,
+        private bool IncludeEnumValues => Boolean.TryParse(this.TransformationArguments[nameof(IncludeEnumValues)].Value,
             out bool includeEnumValues) && includeEnumValues;
 
         /// <summary>
         /// Enumeration member sort order
         /// </summary>
-        private EnumMemberSortOrder EnumMemberSortOrder => Enum.TryParse(
-            TransformationArguments[nameof(EnumMemberSortOrder)].Value,
-            true, out EnumMemberSortOrder sortOrder) ?
-            sortOrder :
-            EnumMemberSortOrder.Value;
+        private EnumMemberSortOrder EnumMemberSortOrder => Enum.TryParse(this.TransformationArguments[nameof(EnumMemberSortOrder)].Value,
+            true, out EnumMemberSortOrder sortOrder) ? sortOrder : EnumMemberSortOrder.Value;
 
         /// <summary>
         /// Flags enumeration value format
         /// </summary>
-        private EnumValueFormat FlagsEnumValueFormat => Enum.TryParse(
-            TransformationArguments[nameof(FlagsEnumValueFormat)].Value,
-            true, out EnumValueFormat format) ?
-            format :
-            EnumValueFormat.IntegerValue;
+        private EnumValueFormat FlagsEnumValueFormat => Enum.TryParse(this.TransformationArguments[nameof(FlagsEnumValueFormat)].Value,
+            true, out EnumValueFormat format) ? format : EnumValueFormat.IntegerValue;
 
         /// <summary>
         /// Flags enumeration value separator group size
         /// </summary>
-        private int FlagsEnumSeparatorSize => int.TryParse(
-            TransformationArguments[nameof(FlagsEnumSeparatorSize)].Value,
-            out int groupSize) ?
-            groupSize :
-            0;
+        private int FlagsEnumSeparatorSize => Int32.TryParse(this.TransformationArguments[nameof(FlagsEnumSeparatorSize)].Value,
+            out int groupSize) ? groupSize : 0;
 
         /// <summary>
         /// Include separators for integer enumeration values
         /// </summary>
-        private bool IncludeIntegerEnumSeparators => bool.TryParse(
-            TransformationArguments[nameof(IncludeIntegerEnumSeparators)].Value,
+        private bool IncludeIntegerEnumSeparators => Boolean.TryParse(this.TransformationArguments[nameof(IncludeIntegerEnumSeparators)].Value,
             out bool includeSeparators) && includeSeparators;
 
         /// <summary>
         /// Base source code URL
         /// </summary>
-        private string BaseSourceCodeUrl => TransformationArguments[nameof(BaseSourceCodeUrl)].Value;
+        private string BaseSourceCodeUrl => this.TransformationArguments[nameof(BaseSourceCodeUrl)].Value;
 
         /// <summary>
         /// Show parameters on all methods on the member list page, not just on overloads
         /// </summary>
-        private bool ShowParametersOnAllMethods => bool.TryParse(
-            TransformationArguments[nameof(ShowParametersOnAllMethods)].Value,
+        private bool ShowParametersOnAllMethods => Boolean.TryParse(this.TransformationArguments[nameof(ShowParametersOnAllMethods)].Value,
             out bool showParameters) && showParameters;
 
         //=====================================================================
@@ -174,7 +125,7 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
         /// <inheritdoc />
         protected override void CreateTransformationArguments()
         {
-            AddTransformationArgumentRange(new[]
+            this.AddTransformationArgumentRange(new[]
             {
                 new TransformationArgument(nameof(BibliographyDataFile), true, true, null,
                     "An optional bibliography data XML file.  Specify the filename with a fully qualified or " +
@@ -226,11 +177,11 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
         /// <inheritdoc />
         protected override void CreateElementHandlers()
         {
-            
-            AddElements(new Element[]
+            this.AddElements(new Element[]
             {
                 // MAML document root element types
-                new NonRenderedParentElement("topic"), new NonRenderedParentElement("codeEntityDocument"),
+                new NonRenderedParentElement("topic"),
+                new NonRenderedParentElement("codeEntityDocument"),
                 new NonRenderedParentElement("developerConceptualDocument"),
                 new NonRenderedParentElement("developerErrorMessageDocument"),
                 new NonRenderedParentElement("developerGlossaryDocument"),
@@ -251,112 +202,112 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
                 new NonRenderedParentElement("developerXmlReference"),
 
                 // HTML elements (may occur in XML comments)
-                new PassthroughElement("a"), 
-                new PassthroughElement("abbr"), 
+                new PassthroughElement("a"),
+                new PassthroughElement("abbr"),
                 new PassthroughElement("acronym"),
-                new PassthroughElement("area"), 
-                new PassthroughElement("article"), 
+                new PassthroughElement("area"),
+                new PassthroughElement("article"),
                 new PassthroughElement("aside"),
-                new PassthroughElement("audio"), 
+                new PassthroughElement("audio"),
                 new MarkdownElement("b", "**", "**", "b"),
-                new PassthroughElement("bdi"), 
+                new PassthroughElement("bdi"),
                 new PassthroughElement("blockquote"),
-                new MarkdownElement("br", null, "  \n", "br"), 
+                new MarkdownElement("br", null, "  \n", "br"),
                 new PassthroughElement("canvas"),
-                new PassthroughElement("datalist"), 
-                new PassthroughElement("dd"), 
+                new PassthroughElement("datalist"),
+                new PassthroughElement("dd"),
                 new PassthroughElement("del"),
-                new PassthroughElement("details"), 
-                new PassthroughElement("dialog"), 
+                new PassthroughElement("details"),
+                new PassthroughElement("dialog"),
                 new PassthroughElement("div"),
-                new PassthroughElement("dl"), 
-                new PassthroughElement("dt"), 
+                new PassthroughElement("dl"),
+                new PassthroughElement("dt"),
                 new MarkdownElement("em", "*", "*", "em"),
-                new PassthroughElement("embed"), 
+                new PassthroughElement("embed"),
                 new PassthroughElement("figcaption"),
                 new PassthroughElement("figure"),
-                new PassthroughElement("font"), 
+                new PassthroughElement("font"),
                 new PassthroughElement("footer"),
-                new MarkdownElement("h1", "# ", null, "h1"), 
+                new MarkdownElement("h1", "# ", null, "h1"),
                 new MarkdownElement("h2", "## ", null, "h2"),
-                new MarkdownElement("h3", "### ", null, "h3"), 
+                new MarkdownElement("h3", "### ", null, "h3"),
                 new MarkdownElement("h4", "#### ", null, "h4"),
-                new MarkdownElement("h5", "##### ", null, "h5"), 
+                new MarkdownElement("h5", "##### ", null, "h5"),
                 new MarkdownElement("h6", "###### ", null, "h6"),
-                new PassthroughElement("header"), 
+                new PassthroughElement("header"),
                 new MarkdownElement("hr", "---", null, "hr"),
-                new MarkdownElement("i", "*", "*", "em"), 
-                new PassthroughElement("img"), 
+                new MarkdownElement("i", "*", "*", "em"),
+                new PassthroughElement("img"),
                 new PassthroughElement("ins"),
-                new PassthroughElement("keygen"), 
-                new PassthroughElement("li"), 
+                new PassthroughElement("keygen"),
+                new PassthroughElement("li"),
                 new PassthroughElement("main"),
-                new PassthroughElement("map"), 
-                new PassthroughElement("mark"), 
+                new PassthroughElement("map"),
+                new PassthroughElement("mark"),
                 new PassthroughElement("meter"),
-                new PassthroughElement("nav"), 
-                new PassthroughElement("ol"), 
+                new PassthroughElement("nav"),
+                new PassthroughElement("ol"),
                 new PassthroughElement("output"),
-                new MarkdownElement("p", "\n", "\n", "p"), 
+                new MarkdownElement("p", "\n", "\n", "p"),
                 new PassthroughElement("pre"),
-                new PassthroughElement("progress"), 
-                new PassthroughElement("q"), 
+                new PassthroughElement("progress"),
+                new PassthroughElement("q"),
                 new PassthroughElement("rp"),
-                new PassthroughElement("rt"), 
-                new PassthroughElement("ruby"), 
+                new PassthroughElement("rt"),
+                new PassthroughElement("ruby"),
                 new PassthroughElement("source"),
-                new MarkdownElement("strong", "**", "**", "strong"), 
+                new MarkdownElement("strong", "**", "**", "strong"),
                 new PassthroughElement("sub"),
-                new PassthroughElement("sup"), 
-                new PassthroughElement("svg"), 
+                new PassthroughElement("sup"),
+                new PassthroughElement("svg"),
                 new PassthroughElement("tbody"),
-                new PassthroughElement("td"), 
-                new PassthroughElement("tfoot"), 
+                new PassthroughElement("td"),
+                new PassthroughElement("tfoot"),
                 new PassthroughElement("th"),
-                new PassthroughElement("thead"), 
-                new PassthroughElement("time"), 
+                new PassthroughElement("thead"),
+                new PassthroughElement("time"),
                 new PassthroughElement("tr"),
-                new PassthroughElement("track"), 
-                new PassthroughElement("u"), 
+                new PassthroughElement("track"),
+                new PassthroughElement("u"),
                 new PassthroughElement("ul"),
-                // new ConvertibleElement("item", "li"),
-                new PassthroughElement("video"), 
+                new PassthroughElement("video"),
                 new PassthroughElement("wbr"),
 
                 // Elements common to HTML, MAML, and/or XML comments.  Processing may differ based on the topic
                 // type (API or MAML).
-                new BibliographyElement(), 
-                new CiteElement(), 
-                new PassthroughElement("code"),
-                new PassthroughElement("include"), 
-                new PassthroughElement("includeAttribute"), 
+                new BibliographyElement(),
+                new CiteElement(),
+                new CodeElement("code"),
+                new PassthroughElement("include"),
+                new PassthroughElement("includeAttribute"),
                 new MarkupElement(),
-                new MarkdownElement("para", "\n", "\n", "p"), 
-                new ListElement(), 
+                new MarkdownElement("para", "\n", "\n", "p"),
+                new ListElement(),
                 new ParametersElement(),
-                new PassthroughElement("referenceLink"), 
-                new PassthroughElement("span"), 
+                new PassthroughElement("referenceLink"),
+                new PassthroughElement("span"),
                 new CodeElement("snippet"),
-                new SummaryElement(), 
+                new SummaryElement(),
                 new TableElement(),
 
                 // MAML elements
                 new NoteElement("alert")
                 {
-                    CautionAlertTemplatePath = ResolvePath(@"Templates\CautionAlertTemplate.xml"),
-                    LanguageAlertTemplatePath = ResolvePath(@"Templates\LanguageAlertTemplate.xml"),
-                    NoteAlertTemplatePath = ResolvePath(@"Templates\NoteAlertTemplate.xml"),
-                    SecurityAlertTemplatePath = ResolvePath(@"Templates\SecurityAlertTemplate.xml"),
-                    ToDoAlertTemplatePath = ResolvePath(@"Templates\ToDoAlertTemplate.xml")
+                    CautionAlertTemplatePath = this.ResolvePath(@"Templates\CautionAlertTemplate.xml"),
+                    LanguageAlertTemplatePath = this.ResolvePath(@"Templates\LanguageAlertTemplate.xml"),
+                    NoteAlertTemplatePath = this.ResolvePath(@"Templates\NoteAlertTemplate.xml"),
+                    SecurityAlertTemplatePath = this.ResolvePath(@"Templates\SecurityAlertTemplate.xml"),
+                    ToDoAlertTemplatePath = this.ResolvePath(@"Templates\ToDoAlertTemplate.xml")
                 },
-                new MarkdownElement("application", "**", "**", "strong"), new NamedSectionElement("appliesTo"),
-                new AutoOutlineElement(), 
+                new MarkdownElement("application", "**", "**", "strong"),
+                new NamedSectionElement("appliesTo"),
+                new AutoOutlineElement(),
                 new NamedSectionElement("background"),
-                new NamedSectionElement("buildInstructions"), 
+                new NamedSectionElement("buildInstructions"),
                 new CodeEntityReferenceElement(),
-                new CodeExampleElement(), 
+                new CodeExampleElement(),
                 new MarkdownElement("codeFeaturedElement", "**", "**", "strong"),
-                new MarkdownElement("codeInline", "`", "`", "code"), 
+                new MarkdownElement("codeInline", "`", "`", "code"),
                 new NonRenderedParentElement("codeReference"),
                 // Command may contain nested elements and markdown inline code (`text`) doesn't render nested
                 // formatting so we use a code element instead.
@@ -364,101 +315,103 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
                 new MarkdownElement("computerOutputInline", "`", "`", "code"),
                 new NonRenderedParentElement("conclusion"),
                 new NonRenderedParentElement("content"),
-                new CopyrightElement(), new NonRenderedParentElement("corporation"),
-                new NonRenderedParentElement("country"), 
+                new CopyrightElement(),
+                new NonRenderedParentElement("corporation"),
+                new NonRenderedParentElement("country"),
                 new MarkdownElement("database", "**", "**", "strong"),
-                new NonRenderedParentElement("date"), 
+                new NonRenderedParentElement("date"),
                 new ConvertibleElement("definedTerm", "dt", true),
-                new ConvertibleElement("definition", "dd"), 
+                new ConvertibleElement("definition", "dd"),
                 new ConvertibleElement("definitionTable", "dl"),
                 new NamedSectionElement("demonstrates"),
                 new NonRenderedParentElement("description"),
                 new NamedSectionElement("dotNetFrameworkEquivalent"),
-                new MarkdownElement("embeddedLabel", "**", "**", "strong"), 
+                new MarkdownElement("embeddedLabel", "**", "**", "strong"),
                 new EntryElement(),
                 new MarkdownElement("environmentVariable", "`", "`", "code"),
-                new MarkdownElement("errorInline", "*", "*", "em"), 
+                new MarkdownElement("errorInline", "*", "*", "em"),
                 new NamedSectionElement("exceptions"),
-                new ExternalLinkElement(), 
+                new ExternalLinkElement(),
                 new NamedSectionElement("externalResources"),
                 new MarkdownElement("fictitiousUri", "*", "*", "em"),
-                new MarkdownElement("foreignPhrase", "*", "*", "em"), 
+                new MarkdownElement("foreignPhrase", "*", "*", "em"),
                 new MarkdownGlossaryElement(),
                 new MarkdownElement("hardware", "**", "**", "strong"),
                 new NamedSectionElement("inThisSection"),
-                new IntroductionElement(), 
+                new IntroductionElement(),
                 new LanguageKeywordElement(),
-                new NamedSectionElement("languageReferenceRemarks"), 
+                new NamedSectionElement("languageReferenceRemarks"),
                 new NonRenderedParentElement("legacy"),
                 new MarkdownElement("legacyBold", "**", "**", "strong"),
-                new MarkdownElement("legacyItalic", "*", "*", "em"), 
+                new MarkdownElement("legacyItalic", "*", "*", "em"),
                 new LegacyLinkElement(),
-                new ConvertibleElement("legacyUnderline", "u"), 
+                new ConvertibleElement("legacyUnderline", "u"),
                 new MarkdownElement("lineBreak", null, "  \n", "br"),
-                new LinkElement(), 
+                new LinkElement(),
                 new ConvertibleElement("listItem", "li", true),
-                new MarkdownElement("literal", "*", "*", "em"), 
+                new MarkdownElement("literal", "*", "*", "em"),
                 new MarkdownElement("localUri", "*", "*", "em"),
-                new NonRenderedParentElement("localizedText"), 
+                new NonRenderedParentElement("localizedText"),
                 new MarkdownElement("math", "*", "*", "em"),
-                new MediaLinkElement(), new MediaLinkInlineElement(), 
+                new MediaLinkElement(),
+                new MediaLinkInlineElement(),
                 new MarkdownElement("newTerm", "*", "*", "em"),
-                new NamedSectionElement("nextSteps"), 
+                new NamedSectionElement("nextSteps"),
                 new MarkdownElement("parameterReference", "*", "*", "em"),
-                new MarkdownElement("phrase", "*", "*", "em"), 
+                new MarkdownElement("phrase", "*", "*", "em"),
                 new MarkdownElement("placeholder", "*", "*", "em"),
-                new NamedSectionElement("prerequisites"), 
+                new NamedSectionElement("prerequisites"),
                 new ProcedureElement(),
-                new ConvertibleElement("quote", "blockquote"), 
+                new ConvertibleElement("quote", "blockquote"),
                 new MarkdownElement("quoteInline", "*", "*", "em"),
-                new NamedSectionElement("reference"), 
+                new NamedSectionElement("reference"),
                 new NamedSectionElement("relatedSections"),
-                new RelatedTopicsElement(), 
+                new RelatedTopicsElement(),
                 new MarkdownElement("replaceable", "*", "*", "em"),
-                new NamedSectionElement("requirements"), 
+                new NamedSectionElement("requirements"),
                 new NamedSectionElement("returnValue"),
-                new NamedSectionElement("robustProgramming"), 
-                new ConvertibleElement("row", "tr"), 
+                new NamedSectionElement("robustProgramming"),
+                new ConvertibleElement("row", "tr"),
                 new SectionElement(),
-                new NonRenderedParentElement("sections"), 
+                new NonRenderedParentElement("sections"),
                 new NamedSectionElement("security"),
-                new NonRenderedParentElement("snippets"), 
+                new NonRenderedParentElement("snippets"),
                 new ConvertibleElement("step", "li", true),
-                new StepsElement(), 
+                new StepsElement(),
                 new ConvertibleElement("subscript", "sub"),
-                new ConvertibleElement("subscriptType", "sub"), 
+                new ConvertibleElement("subscriptType", "sub"),
                 new ConvertibleElement("superscript", "sup"),
-                new ConvertibleElement("superscriptType", "sup"), 
+                new ConvertibleElement("superscriptType", "sup"),
                 new MarkdownElement("system", "**", "**", "strong"),
-                new ConvertibleElement("tableHeader", "thead"), 
+                new ConvertibleElement("tableHeader", "thead"),
                 new NamedSectionElement("textValue"),
                 // The title element is ignored.  The section and table elements handle them as needed.
-                new IgnoredElement("title"), 
+                new IgnoredElement("title"),
                 new NonRenderedParentElement("type"),
                 new MarkdownElement("ui", "**", "**", "strong"),
                 new MarkdownElement("unmanagedCodeEntityReference", "**", "**", "strong"),
                 new MarkdownElement("userInput", "**", "**", "strong"),
-                new MarkdownElement("userInputLocalizable", "**", "**", "strong"), 
+                new MarkdownElement("userInputLocalizable", "**", "**", "strong"),
                 new NamedSectionElement("whatsNew"),
 
                 // XML comments and reflection data file elements
-                new MarkdownElement("c", "`", "`", "code"), 
+                new MarkdownElement("c", "`", "`", "code"),
                 new PassthroughElement("conceptualLink"),
-                new NamedSectionElement("example"), 
+                new NamedSectionElement("example"),
                 new ImplementsElement(),
                 new NoteElement("note")
                 {
-                    CautionAlertTemplatePath = ResolvePath(@"Templates\CautionAlertTemplate.xml"),
-                    LanguageAlertTemplatePath = ResolvePath(@"Templates\LanguageAlertTemplate.xml"),
-                    NoteAlertTemplatePath = ResolvePath(@"Templates\NoteAlertTemplate.xml"),
-                    SecurityAlertTemplatePath = ResolvePath(@"Templates\SecurityAlertTemplate.xml"),
-                    ToDoAlertTemplatePath = ResolvePath(@"Templates\ToDoAlertTemplate.xml")
+                    CautionAlertTemplatePath = this.ResolvePath(@"Templates\CautionAlertTemplate.xml"),
+                    LanguageAlertTemplatePath = this.ResolvePath(@"Templates\LanguageAlertTemplate.xml"),
+                    NoteAlertTemplatePath = this.ResolvePath(@"Templates\NoteAlertTemplate.xml"),
+                    SecurityAlertTemplatePath = this.ResolvePath(@"Templates\SecurityAlertTemplate.xml"),
+                    ToDoAlertTemplatePath = this.ResolvePath(@"Templates\ToDoAlertTemplate.xml")
                 },
-                new MarkdownElement("paramref", "name", "*", "*", "em"), new PreliminaryElement(),
-                // TODO: new PassthroughElement("remarks"),
-                new MdxRemarksElement("remarks"), 
-				new ReturnsElement(), 
-				new SeeElement(),
+                new MarkdownElement("paramref", "name", "*", "*", "em"),
+                new IgnoredElement("preliminary"),
+                new MdxRemarksElement("remarks"),
+                new ReturnsElement(),
+                new SeeElement(),
                 // seeAlso should be a top-level element in the comments but may appear within other elements.
                 // We'll ignore it if seen as they'll be handled manually by the See Also section processing.
                 new IgnoredElement("seealso"),
@@ -469,20 +422,22 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
                     NamespaceAndAssemblyInfoRenderer = RenderApiNamespaceAndAssemblyInformation,
                     InheritanceHierarchyRenderer = RenderApiInheritanceHierarchy
                 },
-                new TemplatesElement(), new ThreadsafetyElement(),
-                new MarkdownElement("typeparamref", "name", "*", "*", "em"), 
-                new ValueElement(), 
-                new VersionsElement()
+                new TemplatesElement(),
+                new ThreadsafetyElement(),
+                new MarkdownElement("typeparamref", "name", "*", "*", "em"),
+                new ValueElement(),
+                new VersionsElement(),
             });
             
-            ReplaceElement(new ConvertibleElement("list", "ul"));
+            // The build in list element isn't mdx complient, so we need to provide our own
+            ReplaceElement(new MdxListElement("list"));
         }
 
         /// <inheritdoc />
         protected override void CreateApiTopicSectionHandlers()
         {
             // API Topic sections will be rendered in this order by default
-            AddApiTopicSectionHandlerRange(new[]
+            this.AddApiTopicSectionHandlerRange(new[]
             {
                 new ApiTopicSectionHandler(ApiTopicSectionType.Notices, t => RenderNotices(t)),
                 new ApiTopicSectionHandler(ApiTopicSectionType.Summary, t => RenderApiSummarySection(t)),
@@ -493,7 +448,7 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
                 new ApiTopicSectionHandler(ApiTopicSectionType.Events,
                     t => RenderApiSectionTable(t, "title_events", t.CommentsNode.Elements("event"))),
                 new ApiTopicSectionHandler(ApiTopicSectionType.Exceptions,
-                    t => RenderApiSectionTable(t, "title_exceptions", CommentsNode.Elements("exception"))),
+                    t => RenderApiSectionTable(t, "title_exceptions", this.CommentsNode.Elements("exception"))),
                 new ApiTopicSectionHandler(ApiTopicSectionType.Versions, t => RenderApiVersionsSection(t)),
                 new ApiTopicSectionHandler(ApiTopicSectionType.Permissions,
                     t => RenderApiSectionTable(t, "title_permissions", t.CommentsNode.Elements("permission"))),
@@ -508,45 +463,51 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
         }
 
         /// <inheritdoc />
+        protected override void CreateNoticeDefinitions()
+        {
+            this.AddNoticeDefinitions(new[] { Notice.PreliminaryNotice, Notice.ObsoleteNotice, Notice.ExperimentalNotice });
+        }
+
+        /// <inheritdoc />
         protected override XDocument RenderTopic()
         {
-            if (_pageTemplate == null)
-                _pageTemplate = LoadTemplateFile(TopicTemplatePath, null);
+            if(pageTemplate == null)
+                pageTemplate = LoadTemplateFile(this.TopicTemplatePath, null);
 
-            var document = new XDocument(_pageTemplate);
+            var document = new XDocument(pageTemplate);
 
-            CurrentElement = document.Root;
-            
-            if (!IsMamlTopic)
+            this.CurrentElement = document.Root;
+
+            if(!this.IsMamlTopic)
             {
                 // This is used by the Save Component to get the filename.  It won't end up in the final result.
                 document.Root?.Add(new XElement("file",
-                    new XAttribute("name", ReferenceNode?.Element("file")?.Attribute("name")?.Value ?? string.Empty)));
+                    new XAttribute("name", this.ReferenceNode?.Element("file")?.Attribute("name")?.Value ?? string.Empty)));
             }
 
-            CurrentElement?.Add("# ",
-                IsMamlTopic ? MamlTopicTitle() : ApiTopicTitle(false, true),
+            this.CurrentElement?.Add("# ",
+                this.IsMamlTopic ? this.MamlTopicTitle() : this.ApiTopicTitle(false, true),
                 new XElement("span", new XAttribute("id", "PageHeader"), " "), "\n");
+            
+            if(!this.IsMamlTopic)
+                this.CurrentElement?.Add(new XElement("include", new XAttribute("item", "headerText"), "\n"));
 
-            if (!IsMamlTopic)
-                CurrentElement?.Add(new XElement("include", new XAttribute("item", "headerText"), "\n"));
-
-            OnRenderStarting(document);
+            this.OnRenderStarting(document);
 
             // Add the topic content.  MAML topics are rendered purely off of the element types.  API topics
             // require custom formatting based on the member type in the topic.
-            if (IsMamlTopic)
-                RenderNode(TopicNode);
+            if(this.IsMamlTopic)
+                this.RenderNode(this.TopicNode);
             else
             {
-                foreach (var section in ApiTopicSections)
+                foreach(var section in this.ApiTopicSections)
                 {
                     section.RenderSection(this);
-                    OnSectionRendered(section.SectionType, section.CustomSectionName);
+                    this.OnSectionRendered(section.SectionType, section.CustomSectionName);
                 }
             }
 
-            OnRenderCompleted(document);
+            this.OnRenderCompleted(document);
 
             return document;
         }
@@ -558,17 +519,17 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
         /// <param name="textNode">The text node to render</param>
         public override void RenderTextNode(XElement? content, XText? textNode)
         {
-            if (content != null && textNode != null)
+            if(content != null && textNode != null)
             {
-                string runText = string.Empty, text = textNode.Value;
+                string runText = String.Empty, text = textNode.Value;
 
                 // If the content element has an xml:space attribute or the parent of the text node is in the
                 // list of elements that should preserve space, just add the text as-is.  Otherwise,normalize the
                 // whitespace.
-                if (text.Length == 0 || content.Name != "document" && content.Attribute(Element.XmlSpace) != null ||
-                    SpacePreservedElements.Contains(textNode.Parent?.Name.LocalName ?? string.Empty) ||
-                    (textNode.Parent?.Name.LocalName == "div" || textNode.Parent?.Name.LocalName == "span") &&
-                     textNode.Ancestors("syntax").Any())
+                if(text.Length == 0 || (content.Name != "document" && content.Attribute(Element.XmlSpace) != null) ||
+                  spacePreservedElements.Contains(textNode.Parent?.Name.LocalName ?? string.Empty) ||
+                  ((textNode.Parent?.Name.LocalName == "div" || textNode.Parent?.Name.LocalName == "span") &&
+                  textNode.Ancestors("syntax").Any()))
                 {
                     runText = text;
                 }
@@ -576,9 +537,9 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
                 {
                     // If there is a preceding non-text sibling that isn't a line break and the text started with
                     // a whitespace, add a leading space.
-                    if (char.IsWhiteSpace(text[0]) && textNode.PreviousNode != null &&
-                        !(textNode.PreviousNode is XText) && (!(textNode.PreviousNode is XElement pn) ||
-                                                              pn.Name.LocalName != "lineBreak"))
+                    if(Char.IsWhiteSpace(text[0]) && textNode.PreviousNode != null &&
+                      !(textNode.PreviousNode is XText) && (!(textNode.PreviousNode is XElement pn) ||
+                      pn.Name.LocalName != "lineBreak"))
                     {
                         runText = " ";
                     }
@@ -587,8 +548,8 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
 
                     // If there is a following non-text sibling and the text ended with a whitespace, add a
                     // trailing space.
-                    if (char.IsWhiteSpace(text[text.Length - 1]) && textNode.NextNode != null &&
-                        !(textNode.NextNode is XText))
+                    if(Char.IsWhiteSpace(text[text.Length - 1]) && textNode.NextNode != null &&
+                      !(textNode.NextNode is XText))
                     {
                         runText += " ";
                     }
@@ -602,21 +563,20 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
         /// <remarks>The returned content element is always null and the content should be inserted into the
         /// transformation's current element after adding the title element.</remarks>
         public override (XElement? Title, XElement? Content) CreateSection(string? uniqueId, bool localizedTitle,
-            string title, string? linkId)
+          string title, string? linkId)
         {
             XElement? titleElement = null;
 
-            if (string.IsNullOrWhiteSpace(title))
+            if(String.IsNullOrWhiteSpace(title))
             {
-                if (localizedTitle)
-                    throw new ArgumentException("Title cannot be null if it represents a localized item ID",
-                        nameof(title));
+                if(localizedTitle)
+                    throw new ArgumentException("Title cannot be null if it represents a localized item ID", nameof(title));
             }
             else
             {
                 XNode titleContent;
 
-                if (localizedTitle)
+                if(localizedTitle)
                     titleContent = new XElement("include", new XAttribute("item", title));
                 else
                     titleContent = new XText(title);
@@ -628,10 +588,10 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
                     titleContent, "\n");
 
                 // Special case for the See Also section.  Use the unique ID as the link ID.
-                if (uniqueId == "seeAlso")
+                if(uniqueId == "seeAlso")
                     linkId = uniqueId;
 
-                if (!string.IsNullOrWhiteSpace(linkId))
+                if(!String.IsNullOrWhiteSpace(linkId))
                     titleElement.Add(new XElement("span", new XAttribute("id", linkId), " "));
             }
 
@@ -645,17 +605,16 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
         {
             XElement? titleElement = null;
 
-            if (string.IsNullOrWhiteSpace(title))
+            if(String.IsNullOrWhiteSpace(title))
             {
-                if (localizedTitle)
-                    throw new ArgumentException("Title cannot be null if it represents a localized item ID",
-                        nameof(title));
+                if(localizedTitle)
+                    throw new ArgumentException("Title cannot be null if it represents a localized item ID", nameof(title));
             }
             else
             {
                 XNode titleContent;
 
-                if (localizedTitle)
+                if(localizedTitle)
                     titleContent = new XElement("include", new XAttribute("item", title));
                 else
                     titleContent = new XText(title);
@@ -673,47 +632,141 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
         //=====================================================================
 
         /// <summary>
-        /// This is used to render the preliminary and obsolete API notices
+        /// This is used to render the notices at the top of each topic
         /// </summary>
         /// <param name="transformation">The topic transformation to use</param>
         private static void RenderNotices(TopicTransformationCore transformation)
         {
-            var preliminary = transformation.CommentsNode.Element("preliminary");
-            var obsolete = transformation.ReferenceNode.AttributeOfType("T:System.ObsoleteAttribute");
+            var notices = new List<XElement>();
 
-            if (preliminary != null || obsolete != null)
+            foreach(var n in transformation.NoticeDefinitions)
             {
-                var currentElement = transformation.CurrentElement;
-                // var notes = new XElement("div");
-                //
-                // currentElement.Add(notes, "\n");
-                // transformation.CurrentElement = notes;
+                string? noticeText = null;
 
-                Collection<XNode> attributesFound = new();
-
-                foreach (var key in LongAttributeRepresentation.Keys)  
+                if(!String.IsNullOrWhiteSpace(n.ElementName))
                 {
-                    if (transformation.ReferenceNode.AttributeOfType(key) is not null)
-                    {
-                        attributesFound.Add(LongAttributeRepresentation[key]);
-                    }
-                }
-                
-                if (preliminary != null)
-                    transformation.RenderNode(preliminary);
-                
-                if (attributesFound.Count > 0)
-                {
-                    if (preliminary != null)
-                        currentElement.Add("\n\n");
+                    var element = transformation.CommentsNode.Element(n.ElementName);
 
-                    foreach (var attr in attributesFound)
+                    if(element != null)
                     {
-                        currentElement.Add(attr);
+                        if(n.UseValueForText)
+                            noticeText = element.Value?.NormalizeWhiteSpace();
+
+                        if(String.IsNullOrWhiteSpace(noticeText))
+                            noticeText = n.NoticeMessage;
                     }
                 }
 
-                transformation.CurrentElement = currentElement;
+                if(noticeText == null && !String.IsNullOrWhiteSpace(n.AttributeTypeName))
+                {
+                    string attrName = n.AttributeTypeName;
+
+                    // Add the "T:" prefix if not specified
+                    if(attrName.Length > 2 && attrName[1] != ':')
+                        attrName = "T:" + attrName;
+
+                    var attr = transformation.ReferenceNode.AttributeOfType(attrName);
+
+                    if(attr != null)
+                    {
+                        if(n.UseValueForText)
+                            noticeText = attr.Element("argument")?.Element("value")?.Value?.NormalizeWhiteSpace();
+
+                        if(String.IsNullOrWhiteSpace(noticeText))
+                            noticeText = n.NoticeMessage;
+                    }
+                }
+
+                if(!String.IsNullOrWhiteSpace(noticeText))
+                {
+                    var message = new XElement("p", "\n",
+                        $":::{n.NoticeStyleClasses ?? "warning"}");
+
+                    if(n.TagText?.Length > 1 && n.TagText[0] == '@')
+                        message.Add("[", 
+                            new XElement("include", new XAttribute("item", n.TagText.Substring(1))), 
+                            "]");
+                    else if (n.TagText?.Length > 1)
+                        message.Add($"[{n.TagText}]");
+                    
+                    message.Add("\n");
+                    
+                    // If the notice text starts with '@', it's a content item
+                    if(noticeText[0] == '@')
+                        message.Add(new XElement("include", new XAttribute("item", noticeText.Substring(1))));
+                    else
+                        message.Add(noticeText);
+
+                    message.Add("\n:::\n");
+                    
+                    notices.Add(message);
+                }
+            }
+            
+            foreach(var n in notices)
+            {
+                transformation.CurrentElement.Add(n, "\n\n");
+            }
+        }
+
+        /// <summary>
+        /// This is used to render the notice tags within a member list entry
+        /// </summary>
+        /// <param name="transformation">The topic transformation to use</param>
+        /// <param name="apiMember">The API member information element</param>
+        /// <param name="parent">The parent element that will contain the notice tags</param>
+        private static void RenderNoticeTags(TopicTransformationCore transformation, XElement apiMember,
+           XElement parent)
+        {
+            var notices = new List<XElement>();
+
+            foreach(var n in transformation.NoticeDefinitions)
+            {
+                string? noticeText = null;
+
+                if(!String.IsNullOrWhiteSpace(n.ElementName))
+                {
+                    var element = apiMember.Element(n.ElementName);
+
+                    if(element != null)
+                        noticeText = n.TagText;
+                }
+
+                if(noticeText == null && !String.IsNullOrWhiteSpace(n.AttributeTypeName))
+                {
+                    string attrName = n.AttributeTypeName;
+
+                    // Add the "T:" prefix if not specified
+                    if(attrName.Length > 2 && attrName[1] != ':')
+                        attrName = "T:" + attrName;
+
+                    var attr = apiMember.AttributeOfType(attrName);
+
+                    if(attr != null)
+                        noticeText = n.TagText;
+                }
+
+                if(!String.IsNullOrWhiteSpace(noticeText))
+                {
+                    var tag = new XElement("Tag", new XAttribute("type", n.TagStyleClasses ?? "is-warning"));
+
+                    // If the notice text starts with '@', it's a content item
+                    if(noticeText[0] == '@')
+                        tag.Add(new XElement("include", new XAttribute("item", noticeText.Substring(1))));
+                    else
+                        tag.Add(noticeText);
+
+                    notices.Add(tag);
+                }
+            }
+
+            if(notices.Count != 0)
+            {
+                if(!parent.IsEmpty)
+                    parent.Add(new XElement("br"));
+
+                foreach(var n in notices)
+                    parent.Add(n, " ");
             }
         }
 
@@ -723,7 +776,7 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
         /// <param name="transformation">The topic transformation to use</param>
         private static void RenderApiSummarySection(TopicTransformationCore transformation)
         {
-            if (transformation.ApiMember.ApiTopicSubgroup != ApiMemberGroup.Overload)
+            if(transformation.ApiMember.ApiTopicSubgroup != ApiMemberGroup.Overload)
             {
                 transformation.CurrentElement.Add("\n");
                 transformation.RenderNode(transformation.CommentsNode.Element("summary"));
@@ -734,13 +787,13 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
                 // Render the summary from the first overloads element.  There should only be one.
                 var overloads = transformation.ReferenceNode.Descendants("overloads").FirstOrDefault();
 
-                if (overloads != null)
+                if(overloads != null)
                 {
                     var summary = overloads.Element("summary");
 
                     transformation.CurrentElement.Add("\n");
 
-                    if (summary != null)
+                    if(summary != null)
                         transformation.RenderNode(summary);
                     else
                         transformation.RenderChildElements(transformation.CurrentElement, overloads.Nodes());
@@ -757,20 +810,18 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
         /// <param name="content">The content element to which the information is added</param>
         private static void RenderApiInheritanceHierarchy(TopicTransformationCore transformation, XElement content)
         {
-            XElement? row,
-                td,
-                family = transformation.ReferenceNode.Element("family"),
+            XElement? row, td, family = transformation.ReferenceNode.Element("family"),
                 implements = transformation.ReferenceNode.Element("implements");
             bool isFirst = true;
 
-            if (family == null && implements == null)
+            if(family == null && implements == null)
                 return;
 
             var table = new XElement("table", "\n");
 
             content.Add(table, "\n\n");
 
-            if (family != null)
+            if(family != null)
             {
                 XElement? descendants = family.Element("descendents"), ancestors = family.Element("ancestors");
 
@@ -780,12 +831,12 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
 
                 table.Add(row, "\n");
 
-                if (ancestors != null)
+                if(ancestors != null)
                 {
                     // Ancestor types are stored nearest to most distant so reverse them
-                    foreach (var typeInfo in ancestors.Elements().Reverse())
+                    foreach(var typeInfo in ancestors.Elements().Reverse())
                     {
-                        if (!isFirst)
+                        if(!isFirst)
                             td.Add("  \u2192  ");
 
                         transformation.RenderTypeReferenceLink(td, typeInfo, false);
@@ -796,10 +847,10 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
                 }
 
                 td.Add(new XElement("referenceLink",
-                    new XAttribute("target", transformation.Key),
-                    new XAttribute("show-container", false)));
+                        new XAttribute("target", transformation.Key),
+                        new XAttribute("show-container", false)));
 
-                if (descendants != null)
+                if(descendants != null)
                 {
                     td = new XElement("td");
                     row = new XElement("tr", new XElement("td", new XElement("strong",
@@ -808,9 +859,9 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
                     table.Add(row, "\n");
                     isFirst = true;
 
-                    foreach (var typeInfo in descendants.Elements().OrderBy(e => e.Attribute("api")?.Value))
+                    foreach(var typeInfo in descendants.Elements().OrderBy(e => e.Attribute("api")?.Value))
                     {
-                        if (!isFirst)
+                        if(!isFirst)
                             td.Add(new XElement("br"));
 
                         transformation.RenderTypeReferenceLink(td, typeInfo, true);
@@ -819,7 +870,7 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
                 }
             }
 
-            if (implements != null)
+            if(implements != null)
             {
                 td = new XElement("td");
                 row = new XElement("tr", new XElement("td", new XElement("strong",
@@ -828,9 +879,9 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
                 table.Add(row, "\n");
                 isFirst = true;
 
-                foreach (var typeInfo in implements.Elements().OrderBy(e => e.Attribute("api")?.Value))
+                foreach(var typeInfo in implements.Elements().OrderBy(e => e.Attribute("api")?.Value))
                 {
-                    if (!isFirst)
+                    if(!isFirst)
                         td.Add(", ");
 
                     transformation.RenderTypeReferenceLink(td, typeInfo, false);
@@ -845,20 +896,20 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
         /// <param name="transformation">The topic transformation to use</param>
         /// <param name="content">The content element to which the information is added</param>
         private static void RenderApiNamespaceAndAssemblyInformation(TopicTransformationCore transformation,
-            XElement content)
+          XElement content)
         {
             // Only API member pages get namespace/assembly info
-            if (transformation.ApiMember.ApiTopicGroup == ApiMemberGroup.List ||
-                transformation.ApiMember.ApiTopicGroup == ApiMemberGroup.RootGroup ||
-                transformation.ApiMember.ApiTopicGroup == ApiMemberGroup.Root ||
-                transformation.ApiMember.ApiTopicGroup == ApiMemberGroup.NamespaceGroup ||
-                transformation.ApiMember.ApiTopicGroup == ApiMemberGroup.Namespace)
+            if(transformation.ApiMember.ApiTopicGroup == ApiMemberGroup.List ||
+               transformation.ApiMember.ApiTopicGroup == ApiMemberGroup.RootGroup ||
+               transformation.ApiMember.ApiTopicGroup == ApiMemberGroup.Root ||
+               transformation.ApiMember.ApiTopicGroup == ApiMemberGroup.NamespaceGroup ||
+               transformation.ApiMember.ApiTopicGroup == ApiMemberGroup.Namespace)
             {
                 return;
             }
 
             var containers = transformation.ReferenceNode.Element("containers");
-            var libraries = containers?.Elements("library").ToList();
+            var libraries = containers?.Elements("library");
 
             content.Add("**",
                 new XElement("include", new XAttribute("item", "boilerplate_requirementsNamespace")), "** ",
@@ -868,7 +919,7 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
             int separatorSize = 1;
             bool first = true;
 
-            if (libraries?.Count() > 1)
+            if(libraries?.Count() > 1)
             {
                 content.Add("**",
                     new XElement("include", new XAttribute("item", "boilerplate_requirementsAssemblies")), "**");
@@ -880,29 +931,27 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
                     new XElement("include", new XAttribute("item", "boilerplate_requirementsAssemblyLabel")), "**");
             }
 
-            string separator = new string(' ', separatorSize);
+            string separator = new String(' ', separatorSize);
             int maxVersionParts = ((DocusaurusMarkdownTransformation)transformation).MaxVersionParts;
 
-            foreach (var l in libraries ?? Enumerable.Empty<XElement>())
+            foreach(var l in libraries)
             {
-                if (!first)
+                if(!first)
                     content.Add("  \n");
 
                 content.Add(separator);
 
-                string version = l.Element("assemblydata")!.Attribute("version")!.Value;
-                string extension = l.Attribute("kind")!.Value.Equals(
-                        "DynamicallyLinkedLibrary", StringComparison.Ordinal) ?
-                        "dll" :
-                        "exe";
+                string version = l.Element("assemblydata")!.Attribute("version")!.Value,
+                    extension = l.Attribute("kind")!.Value.Equals(
+                        "DynamicallyLinkedLibrary", StringComparison.Ordinal) ? "dll" : "exe";
                 string[] versionParts = version.Split(VersionNumberSeparators, StringSplitOptions.RemoveEmptyEntries);
 
                 // Limit the version number parts if requested
-                if (maxVersionParts > 1 && maxVersionParts < 5)
-                    version = string.Join(".", versionParts, 0, maxVersionParts);
+                if(maxVersionParts > 1 && maxVersionParts < 5)
+                    version = String.Join(".", versionParts, 0, maxVersionParts);
 
                 content.Add(new XElement("include",
-                    new XAttribute("item", "assemblyNameAndModule"),
+                        new XAttribute("item", "assemblyNameAndModule"),
                     new XElement("parameter", l.Attribute("assembly")!.Value),
                     new XElement("parameter", l.Attribute("module")!.Value),
                     new XElement("parameter", extension),
@@ -914,26 +963,23 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
             // Show XAML XML namespaces for APIs that support XAML.  All topics that have auto-generated XAML
             // syntax get an "XMLNS for XAML" line in the Requirements section.  Topics with boilerplate XAML
             // syntax, e.g. "Not applicable", do NOT get this line.
-            var xamlCode = transformation.SyntaxNode.Elements("div").Where(d => d.Attribute("codeLanguage")?.Value
-                .Equals("XAML", StringComparison.Ordinal) ?? false)
-                .ToList();
+            var xamlCode = transformation.SyntaxNode.Elements("div").Where(d => d.Attribute("codeLanguage")?.Value.Equals(
+                "XAML", StringComparison.Ordinal) ?? false);
 
-            if (xamlCode.Any())
+            if(xamlCode.Any())
             {
-                var xamlXmlNs = xamlCode.Elements("div")
-                    .Where(d => d.Attribute("class")?.Value == "xamlXmlnsUri")
-                    .ToList();
+                var xamlXmlNS = xamlCode.Elements("div").Where(d => d.Attribute("class")?.Value == "xamlXmlnsUri");
 
                 content.Add("  \n", "**",
                     new XElement("include", new XAttribute("item", "boilerplate_xamlXmlnsRequirements")), "** ");
 
-                if (xamlXmlNs.Any())
+                if(xamlXmlNS.Any())
                 {
                     first = true;
 
-                    foreach (var d in xamlXmlNs)
+                    foreach(var d in xamlXmlNS)
                     {
-                        if (!first)
+                        if(!first)
                             content.Add(", ");
 
                         content.Add(d.Value.NormalizeWhiteSpace());
@@ -952,11 +998,11 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
         private static void RenderApiSyntaxSection(TopicTransformationCore transformation)
         {
             // Only API member pages get a syntax section
-            if (transformation.ApiMember.ApiTopicGroup != ApiMemberGroup.List &&
-                transformation.ApiMember.ApiTopicGroup != ApiMemberGroup.RootGroup &&
-                transformation.ApiMember.ApiTopicGroup != ApiMemberGroup.Root &&
-                transformation.ApiMember.ApiTopicGroup != ApiMemberGroup.NamespaceGroup &&
-                transformation.ApiMember.ApiTopicGroup != ApiMemberGroup.Namespace)
+            if(transformation.ApiMember.ApiTopicGroup != ApiMemberGroup.List &&
+               transformation.ApiMember.ApiTopicGroup != ApiMemberGroup.RootGroup &&
+               transformation.ApiMember.ApiTopicGroup != ApiMemberGroup.Root &&
+               transformation.ApiMember.ApiTopicGroup != ApiMemberGroup.NamespaceGroup &&
+               transformation.ApiMember.ApiTopicGroup != ApiMemberGroup.Namespace)
             {
                 transformation.RenderNode(transformation.SyntaxNode);
             }
@@ -969,7 +1015,7 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
         /// <param name="transformation">The topic transformation to use</param>
         private static void RenderApiMemberList(TopicTransformationCore transformation)
         {
-            switch (transformation.ApiMember)
+            switch(transformation.ApiMember)
             {
                 case var t when t.ApiTopicGroup == ApiMemberGroup.RootGroup || t.ApiTopicGroup == ApiMemberGroup.Root:
                     RenderApiRootList(transformation);
@@ -1002,11 +1048,10 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
             var elements = transformation.ReferenceNode.Element("elements")?.Elements("element").OrderBy(
                 e => e.Element("apidata")?.Attribute("name")?.Value).ToList();
 
-            if ((elements?.Count ?? 0) == 0)
+            if((elements?.Count ?? 0) == 0)
                 return;
 
-            var (title, _) =
-                transformation.CreateSection(elements?[0].GenerateUniqueId(), true, "title_namespaces", null);
+            var (title, _) = transformation.CreateSection(elements?[0].GenerateUniqueId(), true, "title_namespaces", null);
 
             transformation.CurrentElement.Add(title);
 
@@ -1014,7 +1059,7 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
 
             transformation.CurrentElement.Add(table);
 
-            foreach (var e in elements ?? Enumerable.Empty<XElement>())
+            foreach(var e in elements)
             {
                 string name = e.Element("apidata")!.Attribute("name")!.Value;
                 var refLink = new XElement("referenceLink",
@@ -1022,7 +1067,7 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
                     new XAttribute("qualified", "false"));
                 var summaryCell = new XElement("td");
 
-                if (name.Length == 0)
+                if(name.Length == 0)
                     refLink.Add(new XElement("include", new XAttribute("item", "defaultNamespace")));
 
                 table.Add(new XElement("tr", "\n",
@@ -1030,20 +1075,9 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
                     summaryCell, "\n"), "\n");
 
                 var summary = e.Element("summary");
-                var remarks = e.Element("remarks");
 
-
-                if (summary != null || remarks != null)
-                {
-                    if (summary != null)
-                        transformation.RenderChildElements(summaryCell, summary.Nodes());
-
-                    // Enum members may have additional authored content in the remarks node
-                    if (remarks != null)
-                    {
-                        summaryCell.Add(new XElement("br"), new XElement("b", "Remarks: "), remarks.Nodes());
-                    }
-                }
+                if(summary != null)
+                    transformation.RenderChildElements(summaryCell, summary.Nodes());
                 else
                     summaryCell.Add(Element.NonBreakingSpace);
             }
@@ -1061,7 +1095,7 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
                 return name.Substring(name.IndexOf(':') + 1);
             }).ToList();
 
-            if ((elements?.Count ?? 0) == 0)
+            if((elements?.Count ?? 0) == 0)
                 return;
 
             var (title, _) = transformation.CreateSection(elements?[0].GenerateUniqueId(), true,
@@ -1073,7 +1107,7 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
 
             transformation.CurrentElement.Add(table);
 
-            foreach (var e in elements ?? Enumerable.Empty<XElement>())
+            foreach(var e in elements)
             {
                 var summaryCell = new XElement("td");
 
@@ -1085,20 +1119,9 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
                     summaryCell, "\n"), "\n");
 
                 var summary = e.Element("summary");
-                var remarks = e.Element("remarks");
 
-
-                if (summary != null || remarks != null)
-                {
-                    if (summary != null)
-                        transformation.RenderChildElements(summaryCell, summary.Nodes());
-
-                    // Enum members may have additional authored content in the remarks node
-                    if (remarks != null)
-                    {
-                        summaryCell.Add(new XElement("br"), new XElement("b", "Remarks: "), remarks.Nodes());
-                    }
-                }
+                if(summary != null)
+                    transformation.RenderChildElements(summaryCell, summary.Nodes());
                 else
                     summaryCell.Add(Element.NonBreakingSpace);
             }
@@ -1113,9 +1136,9 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
             var elements = transformation.ReferenceNode.Element("elements")!.Elements("element").GroupBy(
                 e => e.Element("apidata")?.Attribute("subgroup")?.Value).ToDictionary(k => k.Key, v => v);
 
-            foreach (string key in new[] { "class", "structure", "interface", "delegate", "enumeration" })
+            foreach(string key in new[] { "class", "structure", "interface", "delegate", "enumeration" })
             {
-                if (elements.TryGetValue(key, out var group))
+                if(elements.TryGetValue(key, out var group))
                 {
                     var (title, _) = transformation.CreateSection(group.First().GenerateUniqueId(), true,
                         "tableTitle_" + key, null);
@@ -1126,7 +1149,7 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
 
                     transformation.CurrentElement.Add(table);
 
-                    foreach (var e in group.OrderBy(el => el.Attribute("api")?.Value))
+                    foreach(var e in group.OrderBy(el => el.Attribute("api")?.Value))
                     {
                         var summaryCell = new XElement("td");
 
@@ -1138,52 +1161,13 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
                             summaryCell, "\n"), "\n");
 
                         var summary = e.Element("summary");
-                        var remarks = e.Element("remarks");
 
+                        if(summary != null)
+                            transformation.RenderChildElements(summaryCell, summary.Nodes());
 
-                        if (summary != null || remarks != null)
-                        {
-                            if (summary != null)
-                                transformation.RenderChildElements(summaryCell, summary.Nodes());
+                        RenderNoticeTags(transformation, e, summaryCell);
 
-                            // Enum members may have additional authored content in the remarks node
-                            if (remarks != null)
-                            {
-                                summaryCell.Add(new XElement("br"), new XElement("b", "Remarks: "), remarks.Nodes());
-                            }
-                        }
-
-                        var attrFound = new Collection<XNode>();
-
-                        foreach (var key2 in ShortAttributeRepresentation.Keys)
-                        {
-                            if (e.AttributeOfType(key2) is not null)
-                            {
-                                attrFound.Add(ShortAttributeRepresentation[key2]);
-                            }
-                        }
-                        
-                        var prelimComment = e.Element("preliminary");
-
-                        if (attrFound.Count > 0 || prelimComment != null)
-                        {
-                            if (!summaryCell.IsEmpty)
-                                summaryCell.Add(new XElement("br"));
-
-
-                            foreach (var attr in attrFound)
-                            {
-                                summaryCell.Add(attr);
-                            }
-
-                            if (prelimComment != null)
-                            {
-                                summaryCell.Add(new XElement("em",
-                                    new XElement("include", new XAttribute("item", "preliminaryShort"))));
-                            }
-                        }
-
-                        if (summaryCell.IsEmpty)
+                        if(summaryCell.IsEmpty)
                             summaryCell.Add(Element.NonBreakingSpace);
                     }
                 }
@@ -1201,23 +1185,23 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
 
             var allMembers = transformation.ReferenceNode.Element("elements")?.Elements("element").ToList();
 
-            if (allMembers == null)
+            if(allMembers == null)
                 return;
 
             List<XElement> fieldMembers = new List<XElement>(), extensionsMethods = new List<XElement>();
 
             // Enumerations can have extension methods which need to be rendered in a separate section
-            foreach (var m in allMembers)
+            foreach(var m in allMembers)
             {
                 XElement? apiData = m.Element("apidata");
 
                 // Some members such as inherited interface members on a derived interface, contain no
                 // metadata and we'll ignore them.
-                if (apiData == null)
+                if(apiData == null)
                     continue;
 
-                if (Enum.TryParse<ApiMemberGroup>(apiData.Attribute("subgroup")?.Value, true, out var subgroup) &&
-                    subgroup == ApiMemberGroup.Field)
+                if(Enum.TryParse<ApiMemberGroup>(apiData.Attribute("subgroup")?.Value, true, out var subgroup) &&
+                  subgroup == ApiMemberGroup.Field)
                 {
                     fieldMembers.Add(m);
                 }
@@ -1225,7 +1209,7 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
                     extensionsMethods.Add(m);
             }
 
-            if (fieldMembers.Count != 0)
+            if(fieldMembers.Count != 0)
             {
                 // Sort order is configurable for enumeration members
                 EnumMemberSortOrder enumMemberSortOrder = thisTransform.EnumMemberSortOrder;
@@ -1238,22 +1222,22 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
                 bool includeEnumValues = thisTransform.IncludeEnumValues;
                 int idx;
 
-                if (includeEnumValues)
+                if(includeEnumValues)
                 {
                     EnumValueFormat enumFormat = thisTransform.FlagsEnumValueFormat;
                     int groupSize = thisTransform.IncludeIntegerEnumSeparators ? 3 : 0, minWidth = 0;
-                    bool signedValues = enumValues.Any(v => v is { Length: > 0 } && v[0] == '-');
+                    bool signedValues = enumValues.Any(v => v.Length > 0 && v[0] == '-');
 
-                    if (enumFormat != EnumValueFormat.IntegerValue &&
-                        thisTransform.ReferenceNode.AttributeOfType("T:System.FlagsAttribute") != null)
+                    if(enumFormat != EnumValueFormat.IntegerValue &&
+                      thisTransform.ReferenceNode.AttributeOfType("T:System.FlagsAttribute") != null)
                     {
                         groupSize = thisTransform.FlagsEnumSeparatorSize;
 
-                        if (groupSize != 0 && groupSize != 4 && groupSize != 8)
+                        if(groupSize != 0 && groupSize != 4 && groupSize != 8)
                             groupSize = 0;
 
                         // Determine the minimum width of the values
-                        if (signedValues)
+                        if(signedValues)
                         {
                             minWidth = enumValues.Select(v => TopicTransformationExtensions.FormatSignedEnumValue(v,
                                 enumFormat, 0, 0)).Max(v => v.Length) - 2;
@@ -1264,20 +1248,20 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
                                 enumFormat, 0, 0)).Max(v => v.Length) - 2;
                         }
 
-                        if (minWidth < 3)
+                        if(minWidth < 3)
                             minWidth = 2;
                         else
                         {
-                            if (minWidth % 4 != 0)
-                                minWidth += 4 - minWidth % 4;
+                            if((minWidth % 4) != 0)
+                                minWidth += 4 - (minWidth % 4);
                         }
                     }
                     else
-                        enumFormat = EnumValueFormat.IntegerValue; // Enforce integer format for non-flags enums
+                        enumFormat = EnumValueFormat.IntegerValue;   // Enforce integer format for non-flags enums
 
-                    for (idx = 0; idx < enumValues.Count; idx++)
+                    for(idx = 0; idx < enumValues.Count; idx++)
                     {
-                        if (signedValues)
+                        if(signedValues)
                         {
                             enumValues[idx] = TopicTransformationExtensions.FormatSignedEnumValue(enumValues[idx],
                                 enumFormat, minWidth, groupSize);
@@ -1301,13 +1285,13 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
 
                 idx = 0;
 
-                foreach (var e in elements)
+                foreach(var e in elements)
                 {
                     var summaryCell = new XElement("td");
 
                     XElement? valueCell = null;
 
-                    if (includeEnumValues)
+                    if(includeEnumValues)
                     {
                         valueCell = new XElement("td", enumValues[idx]);
                         idx++;
@@ -1316,44 +1300,29 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
                     table.Add(new XElement("tr", "\n",
                         new XElement("td", e.Element("apidata")?.Attribute("name")?.Value), "\n",
                         valueCell, "\n", summaryCell, "\n"), "\n");
-                    
+
                     var summary = e.Element("summary");
                     var remarks = e.Element("remarks");
 
 
-                    if (summary != null || remarks != null)
+                    if(summary != null || remarks != null)
                     {
-                        if (summary != null)
+                        if(summary != null)
                             thisTransform.RenderChildElements(summaryCell, summary.Nodes());
 
                         // Enum members may have additional authored content in the remarks node
-                        if (remarks != null)
-                        {
+                        if(remarks != null)
                             summaryCell.Add(new XElement("br"), new XElement("b", "Remarks: "), remarks.Nodes());
-                        }
                     }
 
-                    var attrFound = new Collection<XNode>();
+                    RenderNoticeTags(transformation, e, summaryCell);
 
-                    foreach (var key2 in ShortAttributeRepresentation.Keys)
-                    {
-                        if (e.AttributeOfType(key2) is not null)
-                        {
-                            attrFound.Add(ShortAttributeRepresentation[key2]);
-                        }
-                    }
-                    
-                    foreach (var attr in attrFound)
-                    {
-                        summaryCell.Add(attr);
-                    }
-
-                    if (summaryCell.IsEmpty)
+                    if(summaryCell.IsEmpty)
                         summaryCell.Add(Element.NonBreakingSpace);
                 }
             }
 
-            if (extensionsMethods.Count != 0)
+            if(extensionsMethods.Count != 0)
                 RenderApiTypeMemberLists(transformation);
         }
 
@@ -1366,17 +1335,17 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
         {
             var allMembers = transformation.ReferenceNode.Element("elements")?.Elements("element").ToList();
 
-            if ((allMembers?.Count ?? 0) == 0)
+            if((allMembers?.Count ?? 0) == 0)
                 return;
 
             var overloads = allMembers?.Where(e => e.Attribute("api")!.Value.StartsWith("Overload:",
                 StringComparison.Ordinal)).ToList();
 
             // Remove overload topics and add their members to the full member list
-            foreach (var overload in overloads ?? Enumerable.Empty<XElement>())
+            foreach(var overload in overloads)
             {
-                allMembers?.Remove(overload);
-                allMembers?.AddRange(overload.Elements("element"));
+                allMembers.Remove(overload);
+                allMembers.AddRange(overload.Elements("element"));
             }
 
             var memberGroups = new Dictionary<ApiMemberGroup, List<XElement>>
@@ -1395,28 +1364,26 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
                 { ApiMemberGroup.Overload, new List<XElement>() },
             };
 
-            if (transformation.ApiMember.ApiTopicSubgroup != ApiMemberGroup.Overload)
+            if(transformation.ApiMember.ApiTopicSubgroup != ApiMemberGroup.Overload)
             {
                 // Group the members by section type
-                foreach (var m in allMembers ?? Enumerable.Empty<XElement>())
+                foreach(var m in allMembers)
                 {
-                    XElement? apiData = m.Element("apidata"),
-                        memberData = m.Element("memberdata"),
+                    XElement? apiData = m.Element("apidata"), memberData = m.Element("memberdata"),
                         procedureData = m.Element("proceduredata");
 
                     // Some members such as inherited interface members on a derived interface, contain no
                     // metadata and we'll ignore them.
-                    if (apiData == null)
+                    if(apiData == null)
                         continue;
 
-                    if (!Enum.TryParse<ApiMemberGroup>(apiData.Attribute("subgroup")?.Value, true, out var subgroup))
+                    if(!Enum.TryParse<ApiMemberGroup>(apiData.Attribute("subgroup")?.Value, true, out var subgroup))
                         subgroup = ApiMemberGroup.Unknown;
 
-                    if (!Enum.TryParse<ApiMemberGroup>(apiData.Attribute("subsubgroup")?.Value, true,
-                            out var subsubgroup))
+                    if(!Enum.TryParse<ApiMemberGroup>(apiData.Attribute("subsubgroup")?.Value, true, out var subsubgroup))
                         subsubgroup = ApiMemberGroup.Unknown;
 
-                    switch (m)
+                    switch(m)
                     {
                         // The order of checks is important here and doesn't match the order of the rendered
                         // sections.  It minimizes the conditions we need to check in each subsequent case.
@@ -1462,34 +1429,30 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
 
                         default:
                             // We shouldn't get here, but just in case...
-                            Debug.WriteLine("Unhandled member type Subgroup: {0} Sub-subgroup: {1}", subgroup,
-                                subsubgroup);
+                            Debug.WriteLine("Unhandled member type Subgroup: {0} Sub-subgroup: {1}", subgroup, subsubgroup);
 
-                            if (Debugger.IsAttached)
+                            if(Debugger.IsAttached)
                                 Debugger.Break();
                             break;
                     }
                 }
             }
             else
-                memberGroups[ApiMemberGroup.Overload].AddRange(allMembers ?? Enumerable.Empty<XElement>());
+                memberGroups[ApiMemberGroup.Overload].AddRange(allMembers);
 
             // When called for an enumeration's extension methods, ignore fields as they've already been rendered
-            if (transformation.ApiMember.ApiTopicSubgroup == ApiMemberGroup.Enumeration)
+            if(transformation.ApiMember.ApiTopicSubgroup == ApiMemberGroup.Enumeration)
                 memberGroups[ApiMemberGroup.Field].Clear();
 
             // Render each section with at least one member
-            foreach (var memberType in new[]
-                     {
-                         ApiMemberGroup.Constructor, ApiMemberGroup.Property, ApiMemberGroup.Method,
-                         ApiMemberGroup.Event, ApiMemberGroup.Operator, ApiMemberGroup.Field,
-                         ApiMemberGroup.AttachedProperty, ApiMemberGroup.AttachedEvent, ApiMemberGroup.Extension,
-                         ApiMemberGroup.ExplicitInterfaceImplementation, ApiMemberGroup.Overload
-                     })
+            foreach(var memberType in new[] { ApiMemberGroup.Constructor, ApiMemberGroup.Property,
+                ApiMemberGroup.Method, ApiMemberGroup.Event, ApiMemberGroup.Operator, ApiMemberGroup.Field,
+                ApiMemberGroup.AttachedProperty, ApiMemberGroup.AttachedEvent, ApiMemberGroup.Extension,
+                ApiMemberGroup.ExplicitInterfaceImplementation, ApiMemberGroup.Overload })
             {
                 var members = memberGroups[memberType];
 
-                if (members.Count == 0)
+                if(members.Count == 0)
                     continue;
 
                 var (title, _) = transformation.CreateSection(members.First().GenerateUniqueId(), true,
@@ -1502,30 +1465,26 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
                 transformation.CurrentElement.Add(table);
 
                 // Sort by EII name if present else the member name and then by template count
-                foreach (var e in members.OrderBy(el => el.Element("topicdata")?.Attribute("eiiName")?.Value ??
-                                                        el.Element("apidata")?.Attribute("name")?.Value ?? string.Empty)
-                             .ThenBy(
-                                 el => el.Element("templates")?.Elements().Count() ?? 0))
+                foreach(var e in members.OrderBy(el => el.Element("topicdata")?.Attribute("eiiName")?.Value ??
+                    el.Element("apidata")?.Attribute("name")?.Value ?? String.Empty).ThenBy(
+                    el => el.Element("templates")?.Elements().Count() ?? 0))
                 {
                     XElement referenceLink = new XElement("referenceLink",
-                        new XAttribute("target", e.Attribute("api")!.Value));
-                    string showParameters = !((DocusaurusMarkdownTransformation)transformation).ShowParametersOnAllMethods &&
-                                             transformation.ApiMember.ApiTopicSubgroup != ApiMemberGroup.Overload &&
-                                             e.Element("memberdata")?.Attribute("overload") == null &&
-                                             !(e.Parent?.Attribute("api")?.Value ?? string.Empty).StartsWith(
-                                                 "Overload:", StringComparison.Ordinal) ?
-                        "false" :
-                        "true";
-                    bool isExtensionMethod =
-                        e.AttributeOfType("T:System.Runtime.CompilerServices.ExtensionAttribute") != null;
+                            new XAttribute("target", e.Attribute("api")!.Value));
+                    string showParameters = (!((DocusaurusMarkdownTransformation)transformation).ShowParametersOnAllMethods &&
+                        transformation.ApiMember.ApiTopicSubgroup != ApiMemberGroup.Overload &&
+                        e.Element("memberdata")?.Attribute("overload") == null &&
+                        !(e.Parent?.Attribute("api")?.Value ?? String.Empty).StartsWith(
+                            "Overload:", StringComparison.Ordinal)) ? "false" : "true";
+                    bool isExtensionMethod = e.AttributeOfType("T:System.Runtime.CompilerServices.ExtensionAttribute") != null;
 
                     var summaryCell = new XElement("td");
 
-                    switch (memberType)
+                    switch(memberType)
                     {
                         case var t when t == ApiMemberGroup.Operator &&
-                                        (e.Element("apidata")?.Attribute("name")?.Value == "Explicit" ||
-                                         e.Element("apidata")?.Attribute("name")?.Value == "Implicit"):
+                          (e.Element("apidata")?.Attribute("name")?.Value == "Explicit" ||
+                          e.Element("apidata")?.Attribute("name")?.Value == "Implicit"):
                             referenceLink.Add(new XAttribute("show-parameters", "true"));
                             break;
 
@@ -1535,16 +1494,13 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
                         case var t when t == ApiMemberGroup.Extension:
                             var extensionMethod = new XElement("extensionMethod");
 
-                            foreach (var attr in e.Attributes())
+                            foreach(var attr in e.Attributes())
                                 extensionMethod.Add(new XAttribute(attr));
 
-                            foreach (var typeEl in new[]
-                                     {
-                                         e.Element("apidata"), e.Element("templates"), e.Element("parameters"),
-                                         e.Element("containers")
-                                     })
+                            foreach(var typeEl in new[] { e.Element("apidata"), e.Element("templates"),
+                              e.Element("parameters"), e.Element("containers") })
                             {
-                                if (typeEl != null)
+                                if(typeEl != null)
                                     extensionMethod.Add(new XElement(typeEl));
                             }
 
@@ -1560,95 +1516,53 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
                     table.Add(new XElement("tr", "\n", new XElement("td", referenceLink), "\n", summaryCell, "\n"), "\n");
 
                     var summary = e.Element("summary");
-                    var remarks = e.Element("remarks");
 
+                    if(summary != null)
+                        transformation.RenderChildElements(summaryCell, summary.Nodes());
 
-                    if (summary != null || remarks != null)
+                    if(transformation.ApiMember.ApiTopicSubgroup != ApiMemberGroup.Overload)
                     {
-                        if (summary != null)
-                            transformation.RenderChildElements(summaryCell, summary.Nodes());
-
-                        // Enum members may have additional authored content in the remarks node
-                        if (remarks != null)
-                        {
-                            summaryCell.Add(new XElement("br"), new XElement("b", "Remarks: "), remarks.Nodes());
-                        }
-                    }
-
-                    if (transformation.ApiMember.ApiTopicSubgroup != ApiMemberGroup.Overload)
-                    {
-                        if (memberType == ApiMemberGroup.Extension)
+                        if(memberType == ApiMemberGroup.Extension)
                         {
                             var parameter = new XElement("parameter");
 
                             summaryCell.Add(new XElement("br"),
                                 new XElement("include", new XAttribute("item", "definedBy"),
-                                    parameter));
+                                parameter));
 
-                            transformation.RenderTypeReferenceLink(parameter, e.Element("containers")?.Element("type"),
-                                false);
+                            transformation.RenderTypeReferenceLink(parameter, e.Element("containers")?.Element("type"), false);
                         }
                         else
                         {
-                            if (transformation.ApiMember.TypeTopicId !=
-                                e.Element("containers")?.Element("type")?.Attribute("api")?.Value)
+                            if(transformation.ApiMember.TypeTopicId != e.Element("containers")?.Element("type")?.Attribute("api")?.Value)
                             {
                                 var parameter = new XElement("parameter");
 
                                 summaryCell.Add(new XElement("br"),
                                     new XElement("include", new XAttribute("item", "inheritedFrom"),
-                                        parameter));
+                                    parameter));
 
-                                transformation.RenderTypeReferenceLink(parameter,
-                                    e.Element("containers")?.Element("type"), false);
+                                transformation.RenderTypeReferenceLink(parameter, e.Element("containers")?.Element("type"), false);
                             }
                             else
                             {
-                                if (e.Element("overrides")?.Element("member") != null)
+                                if(e.Element("overrides")?.Element("member") != null)
                                 {
                                     var parameter = new XElement("parameter");
 
                                     summaryCell.Add(new XElement("br"),
                                         new XElement("include", new XAttribute("item", "overridesMember"),
-                                            parameter));
+                                        parameter));
 
-                                    transformation.RenderTypeReferenceLink(parameter,
-                                        e.Element("overrides")?.Element("member"), true);
+                                    transformation.RenderTypeReferenceLink(parameter, e.Element("overrides")?.Element("member"), true);
                                 }
                             }
                         }
                     }
 
-                    var attrFound = new Collection<XNode>();
+                    RenderNoticeTags(transformation, e, summaryCell);
 
-                    foreach (var key2 in ShortAttributeRepresentation.Keys)
-                    {
-                        if (e.AttributeOfType(key2) is not null)
-                        {
-                            attrFound.Add(ShortAttributeRepresentation[key2]);
-                        }
-                    }
-                    
-                    var prelimComment = e.Element("preliminary");
-
-                    if (attrFound.Count > 0 || prelimComment != null)
-                    {
-                        if (!summaryCell.IsEmpty)
-                            summaryCell.Add(new XElement("br"));
-
-                        foreach (var attr in attrFound)
-                        {
-                            summaryCell.Add(attr);
-                        }
-
-                        if (prelimComment != null)
-                        {
-                            summaryCell.Add(new XElement("em",
-                                new XElement("include", new XAttribute("item", "preliminaryShort"))));
-                        }
-                    }
-
-                    if (summaryCell.IsEmpty)
+                    if(summaryCell.IsEmpty)
                         summaryCell.Add(Element.NonBreakingSpace);
                 }
             }
@@ -1661,12 +1575,11 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
         /// <param name="sectionTitleItem">The section title include item</param>
         /// <param name="sectionElements">An enumerable list of the elements to render in the table</param>
         private static void RenderApiSectionTable(TopicTransformationCore transformation, string sectionTitleItem,
-            IEnumerable<XElement> sectionElements)
+          IEnumerable<XElement> sectionElements)
         {
-            var sections = sectionElements as XElement[] ?? sectionElements.ToArray();
-            if (sections.Any())
+            if(sectionElements.Any())
             {
-                var (title, _) = transformation.CreateSection(sections.First().GenerateUniqueId(), true,
+                var (title, _) = transformation.CreateSection(sectionElements.First().GenerateUniqueId(), true,
                     sectionTitleItem, null);
 
                 transformation.CurrentElement.Add(title);
@@ -1675,14 +1588,14 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
 
                 transformation.CurrentElement.Add(table);
 
-                foreach (var se in sections)
+                foreach(var se in sectionElements)
                 {
                     var descCell = new XElement("td");
 
                     table.Add(new XElement("tr", "\n",
                         new XElement("td",
                             new XElement("referenceLink",
-                                new XAttribute("target", se.Attribute("cref")?.Value ?? string.Empty),
+                                new XAttribute("target", se.Attribute("cref")?.Value ?? String.Empty),
                                 new XAttribute("qualified", "false"))), "\n",
                         descCell, "\n"), "\n");
 
@@ -1698,26 +1611,14 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
         private static void RenderApiRemarksSection(TopicTransformationCore transformation)
         {
             // For overloads, render remarks from the first overloads element.  There should only be one.
-            if (transformation.ApiMember.ApiTopicSubgroup != ApiMemberGroup.Overload)
-            {
-                var remarks = transformation.CommentsNode.Element("remarks");
-                if (remarks != null)
-                {
-                    transformation.RenderNode(remarks);
-                }
-            }
+            if(transformation.ApiMember.ApiTopicSubgroup != ApiMemberGroup.Overload)
+                transformation.RenderNode(transformation.CommentsNode.Element("remarks"));
             else
             {
                 var overloads = transformation.ReferenceNode.Descendants("overloads").FirstOrDefault();
 
-                if (overloads != null)
-                {
-                    var remarks = transformation.CommentsNode.Element("remarks");
-                    if (remarks != null)
-                    {
-                        transformation.RenderNode(remarks);
-                    }
-                }
+                if(overloads != null)
+                    transformation.RenderNode(overloads.Element("remarks"));
             }
         }
 
@@ -1728,13 +1629,13 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
         private static void RenderApiExamplesSection(TopicTransformationCore transformation)
         {
             // For overloads, render examples from the overloads element.  There should only be one.
-            if (transformation.ApiMember.ApiTopicSubgroup != ApiMemberGroup.Overload)
+            if(transformation.ApiMember.ApiTopicSubgroup != ApiMemberGroup.Overload)
                 transformation.RenderNode(transformation.CommentsNode.Element("example"));
             else
             {
                 var overloads = transformation.ReferenceNode.Descendants("overloads").FirstOrDefault();
 
-                if (overloads != null)
+                if(overloads != null)
                     transformation.RenderNode(overloads.Element("example"));
             }
         }
@@ -1746,13 +1647,13 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
         private static void RenderApiVersionsSection(TopicTransformationCore transformation)
         {
             // Only API member pages get version information
-            if (transformation.ApiMember.ApiTopicGroup != ApiMemberGroup.List &&
-                transformation.ApiMember.ApiTopicGroup != ApiMemberGroup.RootGroup &&
-                transformation.ApiMember.ApiTopicGroup != ApiMemberGroup.Root &&
-                transformation.ApiMember.ApiTopicGroup != ApiMemberGroup.NamespaceGroup &&
-                transformation.ApiMember.ApiTopicGroup != ApiMemberGroup.Namespace)
+            if(transformation.ApiMember.ApiTopicGroup != ApiMemberGroup.List &&
+               transformation.ApiMember.ApiTopicGroup != ApiMemberGroup.RootGroup &&
+               transformation.ApiMember.ApiTopicGroup != ApiMemberGroup.Root &&
+               transformation.ApiMember.ApiTopicGroup != ApiMemberGroup.NamespaceGroup &&
+               transformation.ApiMember.ApiTopicGroup != ApiMemberGroup.Namespace)
             {
-                foreach (var v in transformation.ReferenceNode.Elements("versions"))
+                foreach(var v in transformation.ReferenceNode.Elements("versions"))
                     transformation.RenderNode(v);
             }
         }
@@ -1765,14 +1666,13 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
         {
             var revisionHistory = transformation.CommentsNode.Element("revisionHistory");
 
-            if (revisionHistory == null || revisionHistory.Attribute("visible")?.Value == "false")
+            if(revisionHistory == null || revisionHistory.Attribute("visible")?.Value == "false")
                 return;
 
             var revisions = revisionHistory.Elements("revision").Where(
-                h => h.Attribute("visible")?.Value != "false")
-                .ToList();
+                h => h.Attribute("visible")?.Value != "false");
 
-            if (revisions.Any())
+            if(revisions.Any())
             {
                 var (title, _) = transformation.CreateSection(revisionHistory.GenerateUniqueId(), true,
                     "title_revisionHistory", null);
@@ -1791,7 +1691,7 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
 
                 transformation.CurrentElement.Add(table);
 
-                foreach (var rh in revisions)
+                foreach(var rh in revisions)
                 {
                     var descCell = new XElement("td");
 
@@ -1811,9 +1711,9 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
         /// <param name="transformation">The topic transformation to use</param>
         private static void RenderApiBibliographySection(TopicTransformationCore transformation)
         {
-            if (transformation.ElementHandlerFor("bibliography") is BibliographyElement b)
+            if(transformation.ElementHandlerFor("bibliography") is BibliographyElement b)
             {
-                if (b.DetermineCitations(transformation).Count != 0)
+                if(b.DetermineCitations(transformation).Count != 0)
                 {
                     // Use the first citation element as the element for rendering.  It's only needed to create
                     // a unique ID for the section.
@@ -1851,34 +1751,34 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
             // with those in element overloads comments.
             var conceptualLinks = transformation.CommentsNode.Descendants("conceptualLink").Where(
                 s => !s.Ancestors("overloads").Any()).Concat(
-                elementOverloads.Descendants("conceptualLink")).GroupBy(
-                c => c.Attribute("target")?.Value ?? string.Empty).Where(g => g.Key.Length != 0).Select(
-                g => g.First()).ToList();
+                    elementOverloads.Descendants("conceptualLink")).GroupBy(
+                        c => c.Attribute("target")?.Value ?? String.Empty).Where(g => g.Key.Length != 0).Select(
+                        g => g.First()).ToList();
 
-            if (seeAlsoCRef.Count != 0 || seeAlsoHRef.Count != 0 || conceptualLinks.Count != 0 ||
-                transformation.ApiMember.ApiTopicGroup == ApiMemberGroup.Type ||
-                transformation.ApiMember.ApiTopicGroup == ApiMemberGroup.Member ||
-                transformation.ApiMember.ApiTopicGroup == ApiMemberGroup.List)
+            if(seeAlsoCRef.Count != 0 || seeAlsoHRef.Count != 0 || conceptualLinks.Count != 0 ||
+              transformation.ApiMember.ApiTopicGroup == ApiMemberGroup.Type ||
+              transformation.ApiMember.ApiTopicGroup == ApiMemberGroup.Member ||
+              transformation.ApiMember.ApiTopicGroup == ApiMemberGroup.List)
             {
                 // This has a fixed ID that matches the one used in MAML topics for the related topics section
                 var (title, _) = transformation.CreateSection("seeAlso", true, "title_relatedTopics", null);
 
                 transformation.CurrentElement.Add(title);
 
-                if (seeAlsoCRef.Count != 0 || transformation.ApiMember.ApiTopicGroup == ApiMemberGroup.Type ||
-                    transformation.ApiMember.ApiTopicGroup == ApiMemberGroup.Member ||
-                    transformation.ApiMember.ApiTopicGroup == ApiMemberGroup.List)
+                if(seeAlsoCRef.Count != 0 || transformation.ApiMember.ApiTopicGroup == ApiMemberGroup.Type ||
+                  transformation.ApiMember.ApiTopicGroup == ApiMemberGroup.Member ||
+                  transformation.ApiMember.ApiTopicGroup == ApiMemberGroup.List)
                 {
                     var (subtitle, _) = transformation.CreateSubsection(true, "title_seeAlso_reference");
 
-                    if (subtitle != null)
+                    if(subtitle != null)
                         transformation.CurrentElement.Add(subtitle);
 
                     RenderApiAutoGeneratedSeeAlsoLinks(transformation, transformation.CurrentElement);
 
-                    if (seeHandler != null)
+                    if(seeHandler != null)
                     {
-                        foreach (var s in seeAlsoCRef)
+                        foreach(var s in seeAlsoCRef)
                         {
                             seeHandler.Render(transformation, s);
                             transformation.CurrentElement.Add("  \n");
@@ -1886,26 +1786,26 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
                     }
                 }
 
-                if (seeAlsoHRef.Count != 0 && seeHandler != null || conceptualLinks.Count != 0 &&
-                                                                       conceptualLinkHandler != null)
+                if((seeAlsoHRef.Count != 0 && seeHandler != null) || (conceptualLinks.Count != 0 &&
+                  conceptualLinkHandler != null))
                 {
                     var (subtitle, _) = transformation.CreateSubsection(true, "title_seeAlso_otherResources");
 
-                    if (subtitle != null)
+                    if(subtitle != null)
                         transformation.CurrentElement.Add(subtitle);
 
-                    if (seeHandler != null)
+                    if(seeHandler != null)
                     {
-                        foreach (var s in seeAlsoHRef)
+                        foreach(var s in seeAlsoHRef)
                         {
                             seeHandler.Render(transformation, s);
                             transformation.CurrentElement.Add("  \n");
                         }
                     }
 
-                    if (conceptualLinkHandler != null)
+                    if(conceptualLinkHandler != null)
                     {
-                        foreach (var c in conceptualLinks)
+                        foreach(var c in conceptualLinks)
                         {
                             conceptualLinkHandler.Render(transformation, c);
                             transformation.CurrentElement.Add("  \n");
@@ -1921,45 +1821,44 @@ namespace DocusaurusPresentationStyle.DocusaurusMarkdown
         /// <param name="transformation">The topic transformation to use</param>
         /// <param name="subsection">The subsection to which the links are added</param>
         private static void RenderApiAutoGeneratedSeeAlsoLinks(TopicTransformationCore transformation,
-            XElement subsection)
+          XElement subsection)
         {
             // Add a link to the containing type on all list and member topics
-            if (transformation.ApiMember.ApiTopicGroup == ApiMemberGroup.Member ||
-                transformation.ApiMember.ApiTopicGroup == ApiMemberGroup.List)
+            if(transformation.ApiMember.ApiTopicGroup == ApiMemberGroup.Member ||
+              transformation.ApiMember.ApiTopicGroup == ApiMemberGroup.List)
             {
                 subsection.Add(new XElement("referenceLink",
-                    new XAttribute("target", transformation.ApiMember.TypeTopicId),
-                    new XAttribute("display-target", "format"),
-                    new XElement("include",
-                        new XAttribute("item", "boilerplate_seeAlsoTypeLink"),
-                        new XElement("parameter", "{0}"),
-                        new XElement("parameter", transformation.ApiMember.TypeApiSubgroup))), "  \n");
+                        new XAttribute("target", transformation.ApiMember.TypeTopicId),
+                        new XAttribute("display-target", "format"),
+                        new XElement("include",
+                            new XAttribute("item", "boilerplate_seeAlsoTypeLink"),
+                            new XElement("parameter", "{0}"),
+                            new XElement("parameter", transformation.ApiMember.TypeApiSubgroup))), "  \n");
             }
 
             // Add a link to the overload topic
-            if (!string.IsNullOrWhiteSpace(transformation.ApiMember.OverloadTopicId))
+            if(!String.IsNullOrWhiteSpace(transformation.ApiMember.OverloadTopicId))
             {
                 subsection.Add(new XElement("referenceLink",
-                    new XAttribute("target", transformation.ApiMember.OverloadTopicId),
-                    new XAttribute("display-target", "format"),
-                    new XAttribute("show-parameters", "false"),
-                    new XElement("include",
-                        new XAttribute("item", "boilerplate_seeAlsoOverloadLink"),
-                        new XElement("parameter", "{0}"))), "  \n");
+                        new XAttribute("target", transformation.ApiMember.OverloadTopicId),
+                        new XAttribute("display-target", "format"),
+                        new XAttribute("show-parameters", "false"),
+                        new XElement("include",
+                            new XAttribute("item", "boilerplate_seeAlsoOverloadLink"),
+                            new XElement("parameter", "{0}"))), "  \n");
             }
 
             // Add a link to the namespace topic
-            var namespaceId = transformation.ReferenceNode.Element("containers")?.Element("namespace")
-                ?.Attribute("api")?.Value;
+            string namespaceId = transformation.ReferenceNode.Element("containers")?.Element("namespace")?.Attribute("api")?.Value;
 
-            if (!string.IsNullOrWhiteSpace(namespaceId))
+            if(!String.IsNullOrWhiteSpace(namespaceId))
             {
                 subsection.Add(new XElement("referenceLink",
-                    new XAttribute("target", namespaceId),
-                    new XAttribute("display-target", "format"),
-                    new XElement("include",
-                        new XAttribute("item", "boilerplate_seeAlsoNamespaceLink"),
-                        new XElement("parameter", "{0}"))), "  \n");
+                        new XAttribute("target", namespaceId),
+                        new XAttribute("display-target", "format"),
+                        new XElement("include",
+                            new XAttribute("item", "boilerplate_seeAlsoNamespaceLink"),
+                            new XElement("parameter", "{0}"))), "  \n");
             }
         }
     }

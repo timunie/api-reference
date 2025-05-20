@@ -14,20 +14,21 @@
     "write-heading-ids": "docusaurus write-heading-ids"
   },
   "dependencies": {
-    "@docusaurus/core": "3.7.0-canary-6269",
-    "@docusaurus/faster": "3.7.0-canary-6269",
-    "@docusaurus/preset-classic": "3.7.0-canary-6269",
-    "@docusaurus/theme-common": "3.7.0-canary-6269",
+    "@docusaurus/core": "3.7.0-canary-6287",
+    "@docusaurus/faster": "3.7.0-canary-6287",
+    "@docusaurus/preset-classic": "3.7.0-canary-6287",
+    "@docusaurus/theme-common": "3.7.0-canary-6287",
     "@mdx-js/react": "^3.1.0",
     "@rspack/core": "^1.2.8",
     "clsx": "^2.1.1",
+    "graceful-fs": "^4.2.11",
     "prism-react-renderer": "^2.4.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "3.7.0-canary-6269",
-    "@docusaurus/types": "3.7.0-canary-6269"
+    "@docusaurus/module-type-aliases": "3.7.0-canary-6287",
+    "@docusaurus/types": "3.7.0-canary-6287"
   },
   "browserslist": {
     "production": [
@@ -44,5 +45,8 @@
   "engines": {
     "node": ">=18.0"
   },
-  "packageManager": "pnpm@10.7.0"
+  "pnpm": {
+    "neverBuiltDependencies": []
+  },
+  "packageManager": "pnpm@10.8.0"
 }
