@@ -48,6 +48,7 @@ $projectsToBuild = @(
 	"ext/Avalonia/src/Linux/Avalonia.LinuxFramebuffer/Avalonia.LinuxFramebuffer.csproj", 
 	"ext/Avalonia/src/Markup/Avalonia.Markup/Avalonia.Markup.csproj", 
 	"ext/Avalonia/src/Markup/Avalonia.Markup.Xaml/Avalonia.Markup.Xaml.csproj", 
+	"ext/Avalonia/src/Markup/Avalonia.Markup.Xaml.Loader/Avalonia.Markup.Xaml.Loader.csproj", 
 	"ext/Avalonia/src/Avalonia.Metal/Avalonia.Metal.csproj", 
 	"ext/Avalonia/src/Avalonia.MicroCom/Avalonia.MicroCom.csproj", 
 	"ext/Avalonia/src/Avalonia.Native/Avalonia.Native.csproj", 
