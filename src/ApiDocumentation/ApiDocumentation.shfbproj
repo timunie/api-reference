@@ -47,7 +47,7 @@
 		  <DocumentationSource sourceFile="..\..\ext\Avalonia\src\Android\Avalonia.Android\Avalonia.Android.csproj" TargetFramework="$(AvsCurrentAndroidTargetFramework)" />
 		  <DocumentationSource sourceFile="..\..\ext\Avalonia\src\Avalonia.Base\Avalonia.Base.csproj" TargetFramework="$(AvsCurrentTargetFramework)" /> 
 		  <DocumentationSource sourceFile="..\..\ext\Avalonia\src\Avalonia.Controls.ColorPicker\Avalonia.Controls.ColorPicker.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />
-		  <DocumentationSource sourceFile="..\..\ext\Avalonia\src\Avalonia.Controls.DataGrid\Avalonia.Controls.DataGrid.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />
+		  <DocumentationSource sourceFile="..\..\ext\Avalonia\external\Avalonia.Controls.DataGrid\src\Avalonia.Controls.DataGrid\Avalonia.Controls.DataGrid.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />
 		  <DocumentationSource sourceFile="..\..\ext\Avalonia\src\Avalonia.Controls\Avalonia.Controls.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />
 		  <DocumentationSource sourceFile="..\..\ext\Avalonia\src\Avalonia.DesignerSupport\Avalonia.DesignerSupport.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />
 		  <DocumentationSource sourceFile="..\..\ext\Avalonia\src\Avalonia.Desktop\Avalonia.Desktop.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />

@@ -21,6 +21,7 @@ else{
 
 # Update git submodules
 git submodule set-branch --branch release/$version ext/Avalonia
+git submodule sync --recursive
 git submodule update --init --recursive --remote
 
 # set SHFBRoot
@@ -37,7 +38,7 @@ $projectsToBuild = @(
 	"ext/Avalonia/src/Browser/Avalonia.Browser.Blazor/Avalonia.Browser.Blazor.csproj", 
 	"ext/Avalonia/src/Avalonia.Controls/Avalonia.Controls.csproj", 
 	"ext/Avalonia/src/Avalonia.Controls.ColorPicker/Avalonia.Controls.ColorPicker.csproj", 
-	"ext/Avalonia/src/Avalonia.Controls.DataGrid/Avalonia.Controls.DataGrid.csproj", 
+	"ext/Avalonia/external/Avalonia.Controls.DataGrid/src/Avalonia.Controls.DataGrid/Avalonia.Controls.DataGrid.csproj", 
 	"ext/Avalonia/src/Avalonia.Desktop/Avalonia.Desktop.csproj", 
 	"ext/Avalonia/src/Avalonia.Diagnostics/Avalonia.Diagnostics.csproj", 
 	"ext/Avalonia/src/Avalonia.Dialogs/Avalonia.Dialogs.csproj", 
