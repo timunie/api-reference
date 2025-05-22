@@ -38,7 +38,6 @@ $projectsToBuild = @(
 	"ext/Avalonia/src/Browser/Avalonia.Browser.Blazor/Avalonia.Browser.Blazor.csproj", 
 	"ext/Avalonia/src/Avalonia.Controls/Avalonia.Controls.csproj", 
 	"ext/Avalonia/src/Avalonia.Controls.ColorPicker/Avalonia.Controls.ColorPicker.csproj", 
-	"ext/Avalonia/external/Avalonia.Controls.DataGrid/src/Avalonia.Controls.DataGrid/Avalonia.Controls.DataGrid.csproj", 
 	"ext/Avalonia/src/Avalonia.Desktop/Avalonia.Desktop.csproj", 
 	"ext/Avalonia/src/Avalonia.Diagnostics/Avalonia.Diagnostics.csproj", 
 	"ext/Avalonia/src/Avalonia.Dialogs/Avalonia.Dialogs.csproj", 
@@ -64,17 +63,27 @@ $projectsToBuild = @(
 	"ext/Avalonia/src/Windows/Avalonia.Win32.Interoperability/Avalonia.Win32.Interoperability.csproj", 
 	"ext/Avalonia/src/Avalonia.X11/Avalonia.X11.csproj", 
 	
-	# Sandcastle documentation
+	"ext/Avalonia/external/Avalonia.Controls.DataGrid/src/Avalonia.Controls.DataGrid/Avalonia.Controls.DataGrid.csproj", 
+	
+	# Sandcastle plug-ins
 	"src/DocusaurusExportPlugin/DocusaurusExportPlugin.csproj",
 	"src/DocusaurusPresentationStyle/DocusaurusPresentationStyle.csproj",
-	"src/AvaloniaAttributesPlugin/AvaloniaAttributesPlugIn.csproj",
-	"src/ApiDocumentation/ApiDocumentation.shfbproj"
+	"src/AvaloniaAttributesPlugin/AvaloniaAttributesPlugIn.csproj"
 )
 
 foreach ($proj in $projectsToBuild){
-	dotnet build $proj -c Release 
-	Write-Host "built $proj"
+	dotnet build $proj -c Release
+	Write-Host "`n built $proj" -ForegroundColor DarkGreen -BackgroundColor Gray
+	Write-Host "`n"
 }
+
+# TODO: Is there a better way for DataGrid? SHFB doesn't understand our artifacts structure so we need to move the output on our own
+New-Item ".\ext\Avalonia\external\Avalonia.Controls.DataGrid\artifacts\bin\Avalonia.Controls.DataGrid\release\net8.0\" -ItemType Directory -Force
+Move-Item -Path ".\ext\Avalonia\external\Avalonia.Controls.DataGrid\artifacts\bin\Avalonia.Controls.DataGrid\release_net8.0\*" `
+          -Destination ".\ext\Avalonia\external\Avalonia.Controls.DataGrid\artifacts\bin\Avalonia.Controls.DataGrid\release\net8.0\" 
+
+# Build the SHFB project
+dotnet build "src/ApiDocumentation/ApiDocumentation.shfbproj" -c Release
 
 # preview the website if preview switch is on
 if($preview.IsPresent){

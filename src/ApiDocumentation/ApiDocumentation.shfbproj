@@ -47,7 +47,6 @@
 		  <DocumentationSource sourceFile="..\..\ext\Avalonia\src\Android\Avalonia.Android\Avalonia.Android.csproj" TargetFramework="$(AvsCurrentAndroidTargetFramework)" />
 		  <DocumentationSource sourceFile="..\..\ext\Avalonia\src\Avalonia.Base\Avalonia.Base.csproj" TargetFramework="$(AvsCurrentTargetFramework)" /> 
 		  <DocumentationSource sourceFile="..\..\ext\Avalonia\src\Avalonia.Controls.ColorPicker\Avalonia.Controls.ColorPicker.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />
-		  <DocumentationSource sourceFile="..\..\ext\Avalonia\external\Avalonia.Controls.DataGrid\src\Avalonia.Controls.DataGrid\Avalonia.Controls.DataGrid.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />
 		  <DocumentationSource sourceFile="..\..\ext\Avalonia\src\Avalonia.Controls\Avalonia.Controls.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />
 		  <DocumentationSource sourceFile="..\..\ext\Avalonia\src\Avalonia.DesignerSupport\Avalonia.DesignerSupport.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />
 		  <DocumentationSource sourceFile="..\..\ext\Avalonia\src\Avalonia.Desktop\Avalonia.Desktop.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />
@@ -75,6 +74,8 @@
 		  <DocumentationSource sourceFile="..\..\ext\Avalonia\src\Markup\Avalonia.Markup\Avalonia.Markup.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />
 		  <DocumentationSource sourceFile="..\..\ext\Avalonia\src\Markup\Avalonia.Markup.Xaml\Avalonia.Markup.Xaml.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />
 		  <DocumentationSource sourceFile="..\..\ext\Avalonia\src\Markup\Avalonia.Markup.Xaml.Loader\Avalonia.Markup.Xaml.Loader.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />
+
+		  <DocumentationSource sourceFile="..\..\ext\Avalonia\external\Avalonia.Controls.DataGrid\src\Avalonia.Controls.DataGrid\Avalonia.Controls.DataGrid.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />
 		  
 		  <!-- TODO: These two don't work as intended.  -->
 		  <!-- <DocumentationSource sourceFile="..\..\ext\Avalonia\src\Windows\Avalonia.Win32.Interoperability\Avalonia.Win32.Interoperability.csproj" TargetFramework="$(AvsCurrentTargetFramework)" /> -->
