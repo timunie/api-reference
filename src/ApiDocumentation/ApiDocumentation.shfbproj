@@ -75,8 +75,9 @@
 		  <DocumentationSource sourceFile="..\..\ext\Avalonia\src\Markup\Avalonia.Markup.Xaml\Avalonia.Markup.Xaml.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />
 		  <DocumentationSource sourceFile="..\..\ext\Avalonia\src\Markup\Avalonia.Markup.Xaml.Loader\Avalonia.Markup.Xaml.Loader.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />
 
-		  <DocumentationSource sourceFile="..\..\ext\Avalonia\external\Avalonia.Controls.DataGrid\src\Avalonia.Controls.DataGrid\Avalonia.Controls.DataGrid.csproj" TargetFramework="$(AvsCurrentTargetFramework)" />
-		  
+		  <DocumentationSource sourceFile="..\..\ext\Avalonia\external\Avalonia.Controls.DataGrid\artifacts\bin\Avalonia.Controls.DataGrid\release_$(AvsCurrentTargetFramework)\Avalonia.Controls.DataGrid.dll"  />
+		  <DocumentationSource sourceFile="..\..\ext\Avalonia\external\Avalonia.Controls.DataGrid\artifacts\bin\Avalonia.Controls.DataGrid\release_$(AvsCurrentTargetFramework)\Avalonia.Controls.DataGrid.xml"  />
+		    
 		  <!-- TODO: These two don't work as intended.  -->
 		  <!-- <DocumentationSource sourceFile="..\..\ext\Avalonia\src\Windows\Avalonia.Win32.Interoperability\Avalonia.Win32.Interoperability.csproj" TargetFramework="$(AvsCurrentTargetFramework)" /> -->
 		  <!-- <DocumentationSource sourceFile="..\..\ext\Avalonia\src\Tizen\Avalonia.Tizen\Avalonia.Tizen.csproj" TargetFramework="$(AvsCurrentTizenTargetFramework)" /> -->
