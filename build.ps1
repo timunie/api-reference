@@ -22,7 +22,9 @@ else{
 # Update git submodules
 git submodule set-branch --branch release/$version ext/Avalonia
 git submodule sync --recursive
-git submodule update --init --recursive --remote
+git submodule update --init --recursive
+
+git submodule foreach -q --recursive 'branch="$(git config -f $toplevel.gitmodules submodule.$name.branch)"; git checkout $branch'
 
 # set SHFBRoot
 $env:SHFBRoot = ".\src\packages\ewsoftware.shfb\2025.3.22\tools\"
