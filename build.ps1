@@ -68,7 +68,10 @@ $projectsToBuild = @(
 	# Sandcastle plug-ins
 	"src/DocusaurusExportPlugin/DocusaurusExportPlugin.csproj",
 	"src/DocusaurusPresentationStyle/DocusaurusPresentationStyle.csproj",
-	"src/AvaloniaAttributesPlugin/AvaloniaAttributesPlugIn.csproj"
+	"src/AvaloniaAttributesPlugin/AvaloniaAttributesPlugIn.csproj",
+
+	# Sandcastle-project
+	"src/ApiDocumentation/ApiDocumentation.shfbproj"
 )
 
 foreach ($proj in $projectsToBuild){
@@ -76,14 +79,6 @@ foreach ($proj in $projectsToBuild){
 	Write-Host "`n built $proj" -ForegroundColor DarkGreen -BackgroundColor Gray
 	Write-Host "`n"
 }
-
-# TODO: Is there a better way for DataGrid? SHFB doesn't understand our artifacts structure so we need to move the output on our own
-New-Item ".\ext\Avalonia\external\Avalonia.Controls.DataGrid\artifacts\bin\Avalonia.Controls.DataGrid\release\net8.0\" -ItemType Directory -Force
-Move-Item -Path ".\ext\Avalonia\external\Avalonia.Controls.DataGrid\artifacts\bin\Avalonia.Controls.DataGrid\release_net8.0\*" `
-          -Destination ".\ext\Avalonia\external\Avalonia.Controls.DataGrid\artifacts\bin\Avalonia.Controls.DataGrid\release\net8.0\" 
-
-# Build the SHFB project
-dotnet build "src/ApiDocumentation/ApiDocumentation.shfbproj" -c Release
 
 # preview the website if preview switch is on
 if($preview.IsPresent){
