@@ -98,6 +98,13 @@
 					</Notices>
 				</configuration>
 			</PlugInConfig>
+            <PlugInConfig id="XPath Reflection File Filter" enabled="True">
+                <configuration>
+                    <expressions>
+                        <expression>/reflection/apis/api[contains(@id,"M:Avalonia.Media.TextFormatting.Unicode.LineBreakEnumerator.MoveNext")]</expression>
+                    </expressions>
+                </configuration>
+            </PlugInConfig>
 		</PlugInConfigurations>
 		<ComponentPath>tools\</ComponentPath>
 		<WarnOnMissingSourceContext>False</WarnOnMissingSourceContext>
