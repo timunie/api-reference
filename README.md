@@ -16,13 +16,20 @@ It is important to mind the build order.
 > [!NOTE]
 > Use the `build.ps1` file to run the build. Usage:
 > ```ps1
-> # -version: specify the Avalonia version to document. If this parameter is not set, `AvaloniaVersion.txt` will be used instead. 
 > # -preview: Add this switch if you want to open the preview of the website. If this switch is missing, an optimized build will be created
-> .\build.ps1 -version 11.2.0 -preview
+> .\build.ps1 -preview
 > ```
 
 ## Generate the API docs for newer Avalonia version
-Open `AvaloniaVersion.txt` and edit it's content to match exact Avalonia version to use. 
+Use the `set-version.ps1` script to update the version. 
+
+```ps1
+# -version: specify the Avalonia version to document. If this parameter is not set, `AvaloniaVersion.txt` will be used instead. 
+.\set-version.ps1 11.2.0 
+```
+
+> [!WARNING]
+> Remember to commit all updates made to the submodule. 
 
 ## Known limitations
 - The API-Reference is only available for a single version as of now. 

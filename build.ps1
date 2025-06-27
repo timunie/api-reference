@@ -1,7 +1,4 @@
 param (
-	[Parameter(HelpMessage="Enter the Avalonia version to document")]
-	[string]$version,
-   
 	[Parameter(HelpMessage="Opens a preview of the website")]
 	[switch]$preview,
 	
@@ -12,15 +9,9 @@ param (
 	[switch]$pack
 )
 
-if ($PSBoundParameters.ContainsKey("version")){
-	New-item ./AvaloniaVersion.txt -ItemType File -Value  $version -Force
-}
-else{
-	$version = Get-Content ./AvaloniaVersion.txt
-}
+$version = Get-Content ./AvaloniaVersion.txt
 
 # Update git submodules
-git submodule set-branch --branch release/$version ext/Avalonia
 git submodule sync --recursive
 git submodule update --init --recursive --remote
 
