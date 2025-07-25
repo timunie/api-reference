@@ -189,6 +189,10 @@ const config = {
             position: 'right',
             className: 'docs-version-dropdown',
           },
+          {
+            type: 'search',
+            position: 'right',
+          },
         ],
       },
       footer: {
@@ -199,6 +203,13 @@ const config = {
         theme: lightCodeTheme,
         darkTheme: darkCodeTheme,
 		additionalLanguages: ['csharp', 'visual-basic', 'fsharp'],
+      },
+      algolia: {
+        // The application ID provided by Algolia
+        appId: 'X4WR1GKMTP',
+        // Public API key: it is safe to commit it
+        apiKey: 'a56d2c912f18d7010199d1ad8ca8085c',
+        indexName: 'API Docs Crawler',
       },
     }),
 	future: {
