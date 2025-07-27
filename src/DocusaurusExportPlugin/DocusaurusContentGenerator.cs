@@ -158,16 +158,29 @@ namespace DocusaurusExportPlugin
                                 });
 
                                 content = EscapeMdxSpecialChars(content);
-                                
-                                File.WriteAllText(topicFile, content);
 
+                                var fileType = filePath.Split('_').FirstOrDefault();
 
-                                sidebar.AddItem(id, filePath, title, content);
-      
-                                topicCount++;
+                                // Some topics are not accessible from the docusaurus page. It is safe to delete those
+                                switch (fileType)
+                                {
+                                    case "Events":
+                                    case "Fields":
+                                    case "Methods":
+                                    case "Properties":
+                                        File.Delete(topicFile);
+                                        break;
 
-                                if ((topicCount % 500) == 0)
-                                    _buildProcess.ReportProgress("{0} topics generated", topicCount);
+                                    default:
+                                        File.WriteAllText(topicFile, content);
+                                        sidebar.AddItem(id, filePath, title, content);
+
+                                        topicCount++;
+                                        
+                                        if ((topicCount % 500) == 0)
+                                            _buildProcess.ReportProgress("{0} topics generated", topicCount);
+                                        break;
+                                }
                             }
                         }
                     }
