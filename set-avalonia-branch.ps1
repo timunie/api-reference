@@ -11,6 +11,7 @@ if (-Not $branchName){
 git submodule set-branch --branch $branchName ext/Avalonia
 git submodule sync --recursive
 git submodule update --init --recursive --remote
+git submodule foreach -q --recursive 'branch="$(git config -f $toplevel.gitmodules submodule.$name.branch)"; git checkout $branch'
 
 git add .\.gitmodules
 git add .\ext\*
