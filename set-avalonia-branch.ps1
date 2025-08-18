@@ -7,6 +7,9 @@ if (-Not $branchName){
 	$branchName = "release/latest"
 }
 
+# make sure submodules are initialized yet 
+git submodule update --init --recursive
+
 # change dir into Avalonia submodule and checkout requested branch. 
 Set-Location .\ext\Avalonia
 git fetch
@@ -14,8 +17,11 @@ git checkout $branchName
 Set-Location ..\..
 
 # Update git submodules
-git submodule update --init --remote --depth=1 --force
-git submodule update --init --recursive
+git submodule update --remote --depth=1 --force
 
+# Commit changes
 git add .\ext\*
 git commit -m "Updated Avalonia submodule to target branch $branchName"
+
+# init submodules again to be up to date with latest commit
+git submodule update --init --recursive
