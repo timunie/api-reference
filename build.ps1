@@ -12,9 +12,8 @@ param (
 $version = Get-Content ./AvaloniaVersion.txt
 
 # Update git submodules. 
+git submodule update --init --remote --depth=1 -f
 git submodule update --init --recursive
-git submodule update --remote --depth = 1
-git submodule update --recursive
 
 # git submodule foreach -q --recursive 'branch="$(git config -f $toplevel.gitmodules submodule.$name.branch)"; git checkout $branch'
 
