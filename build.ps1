@@ -11,11 +11,9 @@ param (
 
 $version = Get-Content ./AvaloniaVersion.txt
 
-# Update git submodules
+# Update git submodules. 
+git submodule update --init --remote --depth=1 -f
 git submodule update --init --recursive
-git submodule update --remote --recursive
-
-# git submodule foreach -q --recursive 'branch="$(git config -f $toplevel.gitmodules submodule.$name.branch)"; git checkout $branch'
 
 # set SHFBRoot
 $env:SHFBRoot = ".\src\packages\ewsoftware.shfb\2025.3.22\tools\"
