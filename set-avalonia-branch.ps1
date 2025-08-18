@@ -16,12 +16,9 @@ git fetch
 git checkout $branchName
 Set-Location ..\..
 
-# Update git submodules
-git submodule update --remote --depth=1 --force
-
 # Commit changes
 git add .\ext\*
 git commit -m "Updated Avalonia submodule to target branch $branchName"
 
-# init submodules again to be up to date with latest commit
-git submodule update --init --recursive
+# Update git submodules
+git submodule update --init --recursive --force
