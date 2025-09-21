@@ -9,16 +9,14 @@ updates:
     directory: "/src" # Location of package manifests
     schedule:
       interval: "weekly"
-    target-branch: "Dependabot/nuget"
 
   - package-ecosystem: "gitsubmodule"
     directory: "/"
     schedule:
-      interval: "daily" 
-    target-branch: "Dependabot/submodule"
+      interval: "daily"
 
   - package-ecosystem: "npm"
     directory: "/website"
     schedule:
       interval: "weekly" 
-    target-branch: "Dependabot/pnpm"
+
