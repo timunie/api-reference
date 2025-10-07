@@ -27,4 +27,4 @@ updates:
         # dependency name)
         applies-to: version-updates # Applies the group rule to version updates
         patterns:
-          - "docusaurus*"  # A wildcard string that matches multiple dependency names
+          - "@docusaurus*"  # A wildcard string that matches multiple dependency names
