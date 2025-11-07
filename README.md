@@ -20,13 +20,20 @@ It is important to mind the build order.
 > .\build.ps1 -preview
 > ```
 
-## Generate the API docs for newer Avalonia version
-Use the `set-version.ps1` script to update the version. 
+## Updating the Sandcastle tools
 
-```ps1
-# -version: specify the Avalonia version to document. If this parameter is not set, `AvaloniaVersion.txt` will be used instead. 
-.\set-version.ps1 11.2.0 
-```
+> [WARNING] if you update the SHFB-nuget packages you also need to update the tools path in `build.ps1`
+> ```ps1
+> # set SHFBRoot
+> $env:SHFBRoot = ".\src\packages\ewsoftware.shfb\2025.9.30\tools\"
+> ```
+
+
+## Generate the API docs for newer Avalonia version
+Use the `update-submodule.ps1` script to update the version to the latest stable. if you need any other branch version, you need to link the branch name for the submodule by hand. 
+
+> [!NOTE]
+> The file `./ext/Avalonia/build/SharedVersion.props` stores the current version info. 
 
 > [!WARNING]
 > Remember to commit all updates made to the submodule. 
